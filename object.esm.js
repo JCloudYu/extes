@@ -62,7 +62,7 @@ function ObjectMerge(target, source) {
 }
 function ObjectGenerate(prototype=null, ...props) {
 	const object = Object.create(prototype);
-	for ( carrier of props ) {
+	for ( const carrier of props ) {
 		if ( Object(carrier) === carrier ) {
 			Object.assign(object, carrier);
 		}
