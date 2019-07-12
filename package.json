@@ -1,0 +1,16 @@
+{
+	"name": "extes",
+	"version": "1.0.3",
+	"description": "A tiny library that extends native js with some handy tools",
+	"main": "index.mjs",
+	"scripts": {},
+	"keywords": [
+		"ECMAScript",
+		"ES",
+		"JS",
+		"Javascript",
+		"Extension"
+	],
+	"author": "JCloudYu",
+	"license": "ISC"
+}
