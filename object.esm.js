@@ -9,9 +9,14 @@ const _ObjectDefineProperties = Object.defineProperties;
 
 Object.defineProperty = ObjectDefineProperty;
 Object.defineProperties = ObjectDefineProperties;
+Object.assignProperties = ObjectAssignProperties;
 Object.merge = ObjectMerge;
 Object.generate = ObjectGenerate;
 Object.typeof = TypeOf;
+Object.assignConstant = function(dst, src){
+	return ObjectAssignProperties(dst, src);
+};
+
 
 
 
@@ -21,6 +26,22 @@ function ObjectDefineProperty(object, prop_name, prop_attr) {
 }
 function ObjectDefineProperties(object, prop_contents) {
 	_ObjectDefineProperties(object, prop_contents);
+	return object;
+}
+function ObjectAssignProperties(object, props, attr={configurable:false, enumerable:false, writable:false}) {
+	for( const prop in props ) {
+		if ( (props.hasOwnProperty && !props.hasOwnProperty(prop)) ||
+			 (props[prop] === undefined)
+		) { continue; }
+		
+		_ObjectDefineProperty(object, prop, {
+			value:props[prop],
+			configurable:!!attr.configurable,
+			enumerable:!!attr.enumerable,
+			writable:!!attr.writable
+		});
+	}
+	
 	return object;
 }
 function ObjectMerge(target, source) {
