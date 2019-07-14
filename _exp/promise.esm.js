@@ -3,8 +3,8 @@
  *	Create: 2019/07/14
 **/
 const _PROMISE_THEN = Promise.prototype.then;
-const _PROMISE_CATCH = Promise.prototype.cache;
-const _PROMISE_FINALLY = Promise.prototype.cache;
+const _PROMISE_CATCH = Promise.prototype.catch;
+const _PROMISE_FINALLY = Promise.prototype.finally;
 
 Promise.prototype.then = function(...args){
 	const next_promise = _PROMISE_THEN.call(this, ...args);
