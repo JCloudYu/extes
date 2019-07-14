@@ -13,7 +13,7 @@ Object.assignProperties = ObjectAssignProperties;
 Object.merge = ObjectMerge;
 Object.generate = ObjectGenerate;
 Object.typeof = TypeOf;
-Object.assignConstant = function(dst, src){
+Object.assignConstants = function(dst, src){
 	return ObjectAssignProperties(dst, src);
 };
 
