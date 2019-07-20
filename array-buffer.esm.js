@@ -4,9 +4,49 @@
 **/
 import {UTF8Encode} from "./_helper/utf8.esm.js";
 
+const HEX_FORMAT = /^(0x)?([0-9a-fA-F]+)$/;
+const BIT_FORMAT = /^(0b|0B)?([01]+)$/;
+const HEX_MAP	 = "0123456789abcdef";
+const HEX_MAP_R	 = {
+	"0":0, "1":1, "2":2, "3":3,
+	"4":4, "5":5, "6":6, "7":7,
+	"8":8, "9":9, "a":10, "b":11,
+	"c":12, "d":13, "e":14, "f":15
+};
+
 Object.defineProperty(ArrayBuffer.prototype, 'bytes', {
 	get:function(){ return new Uint8Array(this); },
 	configurable:true, enumerable:false
+});
+Object.defineProperty(ArrayBuffer.prototype, 'toString', {
+	value:function(format=16, padding=false){
+		const bytes = new Uint8Array(this);
+		
+		let result = '';
+		switch(format) {
+			case 16:
+				for(let i=0; i<bytes.length; i++) {
+					const value = bytes[i];
+					result += HEX_MAP[(value&0xF0)>>>4] + HEX_MAP[value&0x0F];
+				}
+				break;
+				
+			case 2:
+				for(let i=0; i<bytes.length; i++) {
+					const value = bytes[i];
+					for (let k=7; k>=0; k--) {
+						result += ((value >>> k) & 0x01) ? '1' : '0';
+					}
+				}
+				break;
+			
+			default:
+				throw new RangeError( "Unsupported numeric representation!" );
+		}
+		
+		return padding ? result : result.replace(/^0+/, '');
+	},
+	configurable:true, enumerable:false, writable:true
 });
 
 ArrayBuffer.extract = function(input) {
@@ -113,8 +153,60 @@ ArrayBuffer.from = function(input, conversion_info=null) {
 	}
 	
 	if ( typeof input === "string" ) {
-		return UTF8Encode(input).buffer;
+		if ( conversion_info === "hex" ) {
+			const matches = input.match(HEX_FORMAT);
+			if ( !matches ) {
+				throw new RangeError( "Input argument is not a valid hex string!" );
+			}
+		
+			let [,,hex_string] = matches;
+			if ( hex_string.length % 2 === 0 ) {
+				hex_string = hex_string.toLowerCase();
+			}
+			else {
+				hex_string = '0' + hex_string.toLowerCase();
+			}
+			
+			
+			
+			const buff = new Uint8Array((hex_string.length/2)|0);
+			for ( let i=0; i<buff.length; i++ ) {
+				const offset = i * 2;
+				buff[i] = HEX_MAP_R[hex_string[offset]]<<4 | (HEX_MAP_R[hex_string[offset+1]] & 0x0F);
+			}
+			
+			return buff.buffer;
+		}
+		else
+		if ( conversion_info === "bits" ) {
+			const matches = input.match(BIT_FORMAT);
+			if ( !matches ) {
+				throw new RangeError( "Input argument is not a valid bit string!" );
+			}
+			
+			let [,,bit_string] = matches;
+			if ( bit_string.length % 8 !== 0 ) {
+				bit_string = '0'.repeat(bit_string.length%8) + bit_string;
+			}
+			
+			
+			
+			const buff = new Uint8Array((bit_string.length/8)|0);
+			for ( let i=0; i<buff.length; i++ ) {
+				const offset = i * 8;
+				let value = (bit_string[offset]==='1'?1:0);
+				for (let k=1; k<8; k++) {
+					value = (value << 1) | (bit_string[offset + k]==='1'?1:0);
+				}
+				buff[i] = value;
+			}
+			
+			return buff.buffer;
+		}
+		else {
+			return UTF8Encode(input).buffer;
+		}
 	}
 	
-	throw new TypeError( "Cannot convert given input data into array buffer" );
+	throw new TypeError( "Cannot convert given input data into array buffer!" );
 };
