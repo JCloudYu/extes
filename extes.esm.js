@@ -8,3 +8,4 @@ import "./timer.esm.js";
 import "./array-buffer.esm.js";
 import "./element.esm.js";
 import "./node.esm.js";
+import "./html-element.esm.js"
