@@ -6,3 +6,5 @@ import "./object.esm.js";
 import "./promise.esm.js";
 import "./timer.esm.js";
 import "./array-buffer.esm.js";
+import "./element.esm.js";
+import "./node.esm.js";
