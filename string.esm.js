@@ -7,7 +7,7 @@ const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
 	return `${$1.toUpperCase()}${$2.toLowerCase()}${$3}`;
 };
 
-Object.defineProperties(String, {
+Object.defineProperties(String.prototype, {
 	lowerCase:{
 		get:function() {
 			return this.toLowerCase();
