@@ -9,7 +9,9 @@ if ( typeof HTMLElement !== "undefined" ) {
 		}
 		return this;
 	};
-	
+	HTMLElement.prototype.getData = function(key) {
+		return this.dataset[key];
+	};
 	HTMLElement.prototype.removeData = function(...data_names) {
 		for( const name of data_names ) {
 			delete this.dataset[name];
