@@ -7,28 +7,13 @@ const _PROMISE_CATCH = Promise.prototype.catch;
 const _PROMISE_FINALLY = Promise.prototype.finally;
 
 Promise.prototype.then = function(...args) {
-	const next_promise = _PROMISE_THEN.call(this, ...args);
-	Object.assign(next_promise, this);
-	
-	delete this._prev;
-	Object.defineProperty(next_promise, '_prev', {value:this});
-	return next_promise;
+	return DecorateChainedPromise(_PROMISE_THEN.call(this, ...args), this);
 };
 Promise.prototype.catch = function(...args) {
-	const next_promise = _PROMISE_CATCH.call(this, ...args);
-	Object.assign(next_promise, this);
-	
-	delete this._prev;
-	Object.defineProperty(next_promise, '_prev', {value:this});
-	return next_promise;
+	return DecorateChainedPromise(_PROMISE_CATCH.call(this, ...args), this);
 };
 Promise.prototype.finally = function(...args) {
-	const next_promise = _PROMISE_FINALLY.call(this, ...args);
-	Object.assign(next_promise, this);
-	
-	delete this._prev;
-	Object.defineProperty(next_promise, '_prev', {value:this});
-	return next_promise;
+	return DecorateChainedPromise(_PROMISE_FINALLY.call(this, ...args), this);
 };
 
 Promise.wait = PromiseWaitAll;
@@ -83,4 +68,15 @@ function FlattenedPromise() {
 	promise.reject = _reject;
 	promise.promise = promise;
 	return promise;
+}
+function DecorateChainedPromise(next_promise, previous) {
+	for( const prop of Object.keys(previous)) {
+		if ( prop === "_prev" ) continue;
+		next_promise[prop] = previous[prop];
+	}
+	
+	Object.defineProperty(next_promise, '_prev', {
+		value:previous, configurable:true, enumerable:false, writable:true
+	});
+	return next_promise;
 }
