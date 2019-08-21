@@ -2,6 +2,8 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
+const IS_NODE = (typeof Buffer !== "undefined");
+
 const _PROMISE_THEN = Promise.prototype.then;
 const _PROMISE_CATCH = Promise.prototype.catch;
 const _PROMISE_FINALLY = Promise.prototype.finally;
@@ -14,6 +16,23 @@ Promise.prototype.catch = function(...args) {
 };
 Promise.prototype.finally = function(...args) {
 	return DecorateChainedPromise(_PROMISE_FINALLY.call(this, ...args), this);
+};
+Promise.prototype.guard = function() {
+	return DecorateChainedPromise(_PROMISE_CATCH.call(this, (e)=>{
+		setTimeout(()=>{
+			if ( IS_NODE ) {
+				throw e;
+			}
+			else {
+				const event = new Event('unhandledRejection');
+				event.error = e;
+				
+				window.dispatchEvent(event);
+			}
+		}, 0);
+		
+		return e;
+	}), this);
 };
 
 Promise.wait = PromiseWaitAll;
