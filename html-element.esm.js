@@ -17,5 +17,9 @@ if ( typeof HTMLElement !== "undefined" ) {
 			delete this.dataset[name];
 		}
 		return this;
-	}
+	};
+	HTMLElement.prototype.setContentHtml = function(html) {
+		this.innerHTML = html;
+		return this;
+	};
 }
