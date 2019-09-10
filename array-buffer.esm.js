@@ -48,6 +48,24 @@ Object.defineProperty(ArrayBuffer.prototype, 'toString', {
 	},
 	configurable:true, enumerable:false, writable:true
 });
+Object.defineProperty(ArrayBuffer.prototype, 'compare', {
+	value:function(array_buffer) {
+		if ( !(array_buffer instanceof ArrayBuffer) ) {
+			throw new TypeError("An ArrayBuffer can only be compared with another ArrayBuffer");
+		}
+		
+		const a = new Uint8Array(this);
+		const b = new Uint8Array(array_buffer);
+		const len = Math.max(a.length, b.length);
+		for(let i=0; i<len; i++) {
+			const val_a = a[i] || 0, val_b = b[i] || 0;
+			if ( val_a > val_b ) return 1;
+			if ( val_a < val_b ) return -1;
+		}
+		return 0;
+	},
+	configurable:true, enumerable:false, writable:true
+});
 
 ArrayBuffer.extract = function(input) {
 	if ( typeof Buffer !== "undefined" ) {
@@ -209,4 +227,11 @@ ArrayBuffer.from = function(input, conversion_info=null) {
 	}
 	
 	throw new TypeError( "Cannot convert given input data into array buffer!" );
+};
+ArrayBuffer.compare = function(a, b) {
+	if ( !(a instanceof ArrayBuffer) || !(b instanceof ArrayBuffer) ) {
+		throw new TypeError("ArrayBuffer.compare only accepts two array buffers!");
+	}
+	
+	return a.compare(b);
 };
