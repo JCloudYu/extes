@@ -30,4 +30,11 @@ if ( typeof Node !== "undefined" ) {
 		this.textContent = text;
 		return this;
 	};
+	
+	Node.prototype.process = function(processor, ...args) {
+		if ( typeof processor === "function" ) {
+			processor.call(this, ...args);
+		}
+		return this;
+	}
 }
