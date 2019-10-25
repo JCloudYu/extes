@@ -13,3 +13,4 @@ import "./html-input-element.esm.js";
 import "./string.esm.js";
 import "./array.esm.js";
 import "./date.esm.js";
+import "./boolean.esm.js";

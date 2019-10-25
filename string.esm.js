@@ -11,32 +11,32 @@ Object.defineProperties(String.prototype, {
 	upperCase:{
 		get:function() {
 			return this.toUpperCase();
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	},
 	localeUpperCase:{
 		get:function() {
 			return this.toLocaleUpperCase();
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	},
 	lowerCase:{
 		get:function() {
 			return this.toLowerCase();
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	},
 	localeLowerCase:{
 		get:function() {
 			return this.toLocaleLowerCase();
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	},
 	toCamelCase: {
 		value:function() {
 			return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	},
 	camelCase: {
 		get:function() {
 			return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
-		}, configurable:false, enumerable:false
+		}, configurable:true, enumerable:false
 	}
 });
 

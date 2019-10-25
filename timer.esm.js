@@ -2,9 +2,19 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
-setTimeout.create = ThrottledTimeout;
-setInterval.create = ThrottledTimer;
-setTimeout.idle = Idle;
+Object.defineProperty(setTimeout, 'create', {
+	writable:true, configurable:true, enumerable:false,
+	value:ThrottledTimeout
+});
+Object.defineProperty(setTimeout, 'idle', {
+	writable:true, configurable:true, enumerable:false,
+	value:Idle
+});
+
+Object.defineProperty(setInterval, 'create', {
+	writable:true, configurable:true, enumerable:false,
+	value:ThrottledTimer
+});
 
 
 
