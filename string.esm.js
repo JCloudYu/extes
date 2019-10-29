@@ -40,5 +40,11 @@ Object.defineProperties(String.prototype, {
 	}
 });
 
-
-
+Object.defineProperties(String, {
+	encodeRegExpString: {
+		writable:true, configurable:true, enumerable:false,
+		value: function(input_string='') {
+  			return input_string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+		}
+	}
+});

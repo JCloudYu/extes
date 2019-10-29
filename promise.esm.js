@@ -8,35 +8,56 @@ const _PROMISE_THEN = Promise.prototype.then;
 const _PROMISE_CATCH = Promise.prototype.catch;
 const _PROMISE_FINALLY = Promise.prototype.finally;
 
-Promise.prototype.then = function(...args) {
-	return DecorateChainedPromise(_PROMISE_THEN.call(this, ...args), this);
-};
-Promise.prototype.catch = function(...args) {
-	return DecorateChainedPromise(_PROMISE_CATCH.call(this, ...args), this);
-};
-Promise.prototype.finally = function(...args) {
-	return DecorateChainedPromise(_PROMISE_FINALLY.call(this, ...args), this);
-};
-Promise.prototype.guard = function() {
-	return DecorateChainedPromise(_PROMISE_CATCH.call(this, (e)=>{
-		setTimeout(()=>{
-			if ( IS_NODE ) {
-				throw e;
-			}
-			else {
-				const event = new Event('unhandledRejection');
-				event.error = e;
+Object.defineProperties(Promise.prototype, {
+	then: {
+		writable:true, configurable:true, enumerable:false,
+		value: function(...args) {
+			return DecorateChainedPromise(_PROMISE_THEN.call(this, ...args), this);
+		}
+	},
+	catch: {
+		writable:true, configurable:true, enumerable:false,
+		value: function(...args) {
+			return DecorateChainedPromise(_PROMISE_CATCH.call(this, ...args), this);
+		}
+	},
+	finally: {
+		writable:true, configurable:true, enumerable:false,
+		value: function(...args) {
+			return DecorateChainedPromise(_PROMISE_FINALLY.call(this, ...args), this);
+		}
+	},
+	guard: {
+		writable:true, configurable:true, enumerable:false,
+		value: function() {
+			return DecorateChainedPromise(_PROMISE_CATCH.call(this, (e)=>{
+				setTimeout(()=>{
+					if ( IS_NODE ) {
+						throw e;
+					}
+					else {
+						const event = new Event('unhandledRejection');
+						event.error = e;
+						
+						window.dispatchEvent(event);
+					}
+				}, 0);
 				
-				window.dispatchEvent(event);
-			}
-		}, 0);
-		
-		return e;
-	}), this);
-};
-
-Promise.wait = PromiseWaitAll;
-Promise.create = FlattenedPromise;
+				return e;
+			}), this);
+		}
+	}
+});
+Object.defineProperties(Promise, {
+	wait: {
+		writable:true, configurable:true, enumerable:false,
+		value: PromiseWaitAll
+	},
+	create: {
+		writable:true, configurable:true, enumerable:false,
+		value: FlattenedPromise
+	}
+});
 
 
 
