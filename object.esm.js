@@ -4,20 +4,48 @@
 **/
 const _ObjectDefineProperty = Object.defineProperty;
 const _ObjectDefineProperties = Object.defineProperties;
+const writable=true, configurable=true, enumerable=false;
 
 
 
-Object.defineProperty = ObjectDefineProperty;
-Object.defineProperties = ObjectDefineProperties;
-Object.assignProperties = ObjectAssignProperties;
-Object.merge = ObjectMerge;
-Object.generate = ObjectGenerate;
-Object.typeof = TypeOf;
-Object.assignConstants = function(dst, src, enumerable=false){
-	return ObjectAssignProperties(dst, src, {
-		configurable:false, writable:false, enumerable
-	});
-};
+_ObjectDefineProperty(Object, 'defineProperty', {
+	writable, configurable, enumerable,
+	value: ObjectDefineProperty
+});
+_ObjectDefineProperty(Object, 'defineProperties', {
+	writable, configurable, enumerable,
+	value: ObjectDefineProperties
+});
+_ObjectDefineProperty(Object, 'assignProperties', {
+	writable, configurable, enumerable,
+	value: ObjectAssignProperties
+});
+_ObjectDefineProperty(Object, 'assignValues', {
+	writable, configurable, enumerable,
+	value: ObjectAssignValues
+});
+_ObjectDefineProperty(Object, 'assignConstants', {
+	writable, configurable, enumerable,
+	value: (dst, src, enumerable=false)=>{
+		return ObjectAssignValues(dst, src, {
+			configurable:false, writable:false, enumerable
+		});
+	}
+});
+_ObjectDefineProperty(Object, 'merge', {
+	writable, configurable, enumerable,
+	value: ObjectMerge
+});
+_ObjectDefineProperty(Object, 'generate', {
+	writable, configurable, enumerable,
+	value: ObjectGenerate
+});
+_ObjectDefineProperty(Object, 'typeof', {
+	writable, configurable, enumerable,
+	value: TypeOf
+});
+
+
 
 
 
@@ -30,17 +58,54 @@ function ObjectDefineProperties(object, prop_contents) {
 	_ObjectDefineProperties(object, prop_contents);
 	return object;
 }
-function ObjectAssignProperties(object, props, attr={configurable:false, enumerable:false, writable:false}) {
+function ObjectAssignProperties(object, props, attr={configurable:true, enumerable:false, writable:true}) {
+	const _i_conf = !!attr.configurable;
+	const _i_enum = !!attr.enumerable;
+	const _i_writ = !!attr.writable;
+	
 	for( const prop in props ) {
-		if ( (props.hasOwnProperty && !props.hasOwnProperty(prop)) ||
-			 (props[prop] === undefined)
-		) { continue; }
+		const descriptor = props[prop];
+		if ( Object(descriptor) !== descriptor ) continue;
+		
+		
+		const is_accessor = (descriptor.get || descriptor.set);
+		const is_data = (descriptor.value || descriptor.writable);
+		
+		if ( is_accessor && is_data ) {
+			throw new SyntaxError( "A property descriptor can be either an accessor descriptor or a data descriptor" );
+		}
+		
+		if ( is_accessor ) {
+			_ObjectDefineProperty(object, prop, {
+				get: descriptor.get,
+				set: descriptor.set,
+				configurable:descriptor.configurable === undefined ? _i_conf : !!descriptor.configurable,
+				enumerable:descriptor.enumerable === undefined ? _i_enum : !!descriptor.enumerable
+			});
+		}
+		else {
+			_ObjectDefineProperty(object, prop, {
+				value:descriptor.value,
+				configurable:descriptor.configurable === undefined ? _i_conf : !!descriptor.configurable,
+				enumerable:descriptor.enumerable === undefined ? _i_enum : !!descriptor.enumerable,
+				writable:descriptor.writable === undefined ? _i_writ : !!descriptor.writable
+			});
+		}
+	}
+	
+	return object;
+}
+function ObjectAssignValues(object, props, attr={configurable:true, enumerable:false, writable:true}) {
+	const configurable = !!attr.configurable;
+	const enumerable = !!attr.enumerable;
+	const writable = !!attr.writable;
+
+	for ( const prop in props ) {
+		const value = props[prop];
+		if ( props[prop] === undefined ) continue;
 		
 		_ObjectDefineProperty(object, prop, {
-			value:props[prop],
-			configurable:!!attr.configurable,
-			enumerable:!!attr.enumerable,
-			writable:!!attr.writable
+			value, configurable, enumerable, writable
 		});
 	}
 	
