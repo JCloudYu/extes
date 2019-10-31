@@ -16,15 +16,16 @@ _ObjectDefineProperty(Object, 'defineProperties', {
 	writable, configurable, enumerable,
 	value: ObjectDefineProperties
 });
-_ObjectDefineProperty(Object, 'assignProperties', {
+
+Object.defineProperty(Object, 'assignProperties', {
 	writable, configurable, enumerable,
 	value: ObjectAssignProperties
 });
-_ObjectDefineProperty(Object, 'assignValues', {
+Object.defineProperty(Object, 'assignValues', {
 	writable, configurable, enumerable,
 	value: ObjectAssignValues
 });
-_ObjectDefineProperty(Object, 'assignConstants', {
+Object.defineProperty(Object, 'assignConstants', {
 	writable, configurable, enumerable,
 	value: (dst, src, enumerable=false)=>{
 		return ObjectAssignValues(dst, src, {
@@ -32,15 +33,15 @@ _ObjectDefineProperty(Object, 'assignConstants', {
 		});
 	}
 });
-_ObjectDefineProperty(Object, 'merge', {
+Object.defineProperty(Object, 'merge', {
 	writable, configurable, enumerable,
 	value: ObjectMerge
 });
-_ObjectDefineProperty(Object, 'generate', {
+Object.defineProperty(Object, 'generate', {
 	writable, configurable, enumerable,
 	value: ObjectGenerate
 });
-_ObjectDefineProperty(Object, 'typeof', {
+Object.defineProperty(Object, 'typeof', {
 	writable, configurable, enumerable,
 	value: TypeOf
 });
