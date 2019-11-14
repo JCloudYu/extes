@@ -10,7 +10,6 @@ Object.defineProperty(setTimeout, 'idle', {
 	writable:true, configurable:true, enumerable:false,
 	value:Idle
 });
-
 Object.defineProperty(setInterval, 'create', {
 	writable:true, configurable:true, enumerable:false,
 	value:ThrottledTimer

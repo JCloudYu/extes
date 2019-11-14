@@ -3,38 +3,51 @@
  *	Create: 2019/07/23
 **/
 if ( typeof Node !== "undefined" ) {
-	Node.prototype.prependChild = function(child) {
-		this.insertBefore(child, this.children[0]||null);
-		return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
-	};
-	
-	Node.prototype.insertNeighborBefore = function(child) {
-		if ( !this.parentNode ) {
-			throw new RangeError( "Reference element is currently in detached mode! No way to add neighbors!" );
+	const configurable = true, writable = true, enumerable = false;
+
+	Object.defineProperty( Node.prototype, 'prependChild', {
+		configurable, writable, enumerable,
+		value: function(child) {
+			this.insertBefore(child, this.children[0]||null);
+			return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
 		}
-	
-		this.parentNode.insertBefore(child, this);
-		return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
-	};
-	
-	Node.prototype.insertNeighborAfter = function(child) {
-		if ( !this.parentNode ) {
-			throw new RangeError( "Reference element is currently in detached mode! No way to add neighbors!" );
-		}
+	});
+	Object.defineProperty( Node.prototype, 'insertNeighborBefore', {
+		configurable, writable, enumerable,
+		value: function(child) {
+			if ( !this.parentNode ) {
+				throw new RangeError( "Reference element is currently in detached mode! No way to add neighbors!" );
+			}
 		
-		this.parentNode.insertBefore(child, this.nextSibling);
-		return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
-	};
-	
-	Node.prototype.setContentText = function(text) {
-		this.textContent = text;
-		return this;
-	};
-	
-	Node.prototype.process = function(processor, ...args) {
-		if ( typeof processor === "function" ) {
-			processor.call(this, ...args);
+			this.parentNode.insertBefore(child, this);
+			return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
 		}
-		return this;
-	}
+	});
+	Object.defineProperty( Node.prototype, 'insertNeighborAfter', {
+		configurable, writable, enumerable,
+		value: function(child) {
+			if ( !this.parentNode ) {
+				throw new RangeError( "Reference element is currently in detached mode! No way to add neighbors!" );
+			}
+			
+			this.parentNode.insertBefore(child, this.nextSibling);
+			return ( this instanceof DocumentFragment ) ? new DocumentFragment() : child;
+		}
+	});
+	Object.defineProperty( Node.prototype, 'setContentText', {
+		configurable, writable, enumerable,
+		value: function(text) {
+			this.textContent = text;
+			return this;
+		}
+	});
+	Object.defineProperty( Node.prototype, 'process', {
+		configurable, writable, enumerable,
+		value: function(processor, ...args) {
+			if ( typeof processor === "function" ) {
+				processor.call(this, ...args);
+			}
+			return this;
+		}
+	});
 }

@@ -41,11 +41,20 @@ Object.defineProperty(Object, 'generate', {
 	writable, configurable, enumerable,
 	value: ObjectGenerate
 });
-Object.defineProperty(Object, 'typeof', {
+Object.defineProperty(Object, 'typeOf', {
 	writable, configurable, enumerable,
 	value: TypeOf
 });
 
+Object.defineProperty(Object.prototype, '_decorate', {
+	writable, configurable, enumerable,
+	value: function(processor, ...args) {
+		if ( typeof processor === "function" ) {
+			processor.call(this, ...args);
+		}
+		return this;
+	}
+});
 
 
 
