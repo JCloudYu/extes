@@ -2,6 +2,9 @@
  *	Author: JCloudYu
  *	Create: 2019/07/19
 **/
+
+const UTF8_DECODE_CHUNK_SIZE = 100;
+
 /**
  *	Encode given input js string using utf8 format
  *	@param {String} js_str
@@ -94,5 +97,13 @@ export function UTF8Decode(raw_bytes) {
 			i += 3;
 		}
 	}
-	return String.fromCodePoint(...codePoints);
+	
+	
+	
+	let result_string = "";
+	while(codePoints.length > 0) {
+		const chunk = codePoints.splice(0, UTF8_DECODE_CHUNK_SIZE);
+		result_string += String.fromCharCode(...chunk);
+	}
+	return result_string;
 }

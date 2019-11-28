@@ -1,6 +1,6 @@
 {
 	"name": "extes",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "A tiny library that extends native js with some handy tools",
 	"main": "index.mjs",
 	"scripts": {},
