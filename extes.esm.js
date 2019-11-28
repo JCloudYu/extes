@@ -16,3 +16,4 @@ import "./date.esm.js";
 import "./boolean.esm.js";
 import "./blob.esm.js";
 import "./event-target.esm.js";
+import "./error.esm.js";
