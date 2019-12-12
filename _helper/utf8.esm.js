@@ -11,9 +11,15 @@ const UTF8_DECODE_CHUNK_SIZE = 100;
  *	@returns {Uint8Array}
 **/
 export function UTF8Encode(js_str) {
+	if ( typeof js_str !== "string" ) {
+		throw new TypeError( "Given input argument must be a js string!" );
+	}
+
 	let codePoints = [];
-	for( let i = 0; i < js_str.length; i++ ) {
+	let i=0;
+	while( i < js_str.length ) {
 		let codePoint = js_str.codePointAt(i);
+		
 		// 1-byte sequence
 		if( (codePoint & 0xffffff80) === 0 ) {
 			codePoints.push(codePoint);
@@ -43,9 +49,7 @@ export function UTF8Encode(js_str) {
 			);
 		}
 		
-		if( codePoint > 0xffff ){
-			i++;
-		}
+		i += (codePoint>0xFFFF) ? 2 : 1;
 	}
 	return new Uint8Array(codePoints);
 }
@@ -66,18 +70,20 @@ export function UTF8Decode(raw_bytes) {
 
 	let uint8 = raw_bytes;
 	let codePoints = [];
-	for( let i = 0; i < uint8.length; i++ ) {
+	let i = 0;
+	while( i < uint8.length ) {
 		let codePoint = uint8[i] & 0xff;
 		
 		// 1-byte sequence (0 ~ 127)
 		if( (codePoint & 0x80) === 0 ){
 			codePoints.push(codePoint);
+			i += 1;
 		}
 		// 2-byte sequence (192 ~ 223)
-		else if( (codePoint & 0xe0) === 0xc0 ){
+		else if( (codePoint & 0xE0) === 0xC0 ){
 			codePoint = ((0x1f & uint8[i]) << 6) | (0x3f & uint8[i + 1]);
 			codePoints.push(codePoint);
-			i += 1;
+			i += 2;
 		}
 		// 3-byte sequence (224 ~ 239)
 		else if( (codePoint & 0xf0) === 0xe0 ){
@@ -85,7 +91,7 @@ export function UTF8Decode(raw_bytes) {
 				| ((0x3f & uint8[i + 1]) << 6)
 				| (0x3f & uint8[i + 2]);
 			codePoints.push(codePoint);
-			i += 2;
+			i += 3;
 		}
 		// 4-byte sequence (249 ~ )
 		else if( (codePoint & 0xF8) === 0xF0 ){
@@ -94,7 +100,10 @@ export function UTF8Decode(raw_bytes) {
 				| ((0x3f & uint8[i + 2]) << 6)
 				| (0x3f & uint8[i + 3]);
 			codePoints.push(codePoint);
-			i += 3;
+			i += 4;
+		}
+		else {
+			i += 1;
 		}
 	}
 	
@@ -103,7 +112,7 @@ export function UTF8Decode(raw_bytes) {
 	let result_string = "";
 	while(codePoints.length > 0) {
 		const chunk = codePoints.splice(0, UTF8_DECODE_CHUNK_SIZE);
-		result_string += String.fromCharCode(...chunk);
+		result_string += String.fromCodePoint(...chunk);
 	}
 	return result_string;
 }
