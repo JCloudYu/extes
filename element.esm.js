@@ -16,14 +16,32 @@ if ( typeof Element !== "undefined" ) {
 		addClass: {
 			configurable, enumerable, writable,
 			value: function(...classes) {
-				this.classList.add(...classes);
+				const filtered = [];
+				for( const class_name of classes ) {
+					if ( class_name === undefined || class_name === null || class_name === '' ) {
+						continue;
+					}
+					
+					filtered.push(class_name);
+				}
+				
+				this.classList.add(...filtered);
 				return this;
 			}
 		},
 		removeClass: {
 			configurable, enumerable, writable,
 			value: function(...classes) {
-				this.classList.remove(...classes);
+				const filtered = [];
+				for( const class_name of classes ) {
+					if ( class_name === undefined || class_name === null || class_name === '' ) {
+						continue;
+					}
+					
+					filtered.push(class_name);
+				}
+			
+				this.classList.remove(...filtered);
 				return this;
 			}
 		},
