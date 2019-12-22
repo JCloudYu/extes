@@ -2,7 +2,6 @@
  *	Author: JCloudYu
  *	Create: 2019/07/25
 **/
-const _PRIVATES = new WeakMap();
 const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
 const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
 	return `${$1.toUpperCase()}${$2.toLowerCase()}${$3}`;
@@ -10,36 +9,47 @@ const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
 
 
 
-function TemplateStorage(strings, ...dynamics) {
-	if ( this instanceof TemplateStorage ) return;
+function StringTemplateResolver(strings, ...dynamics) {
+	if ( this instanceof StringTemplateResolver ) {
+		
+		this.strings = strings;
+		this.fields = dynamics;
+		return;
+	}
 
-	const tmpl_inst = new TemplateStorage();
-	_PRIVATES.set(tmpl_inst, {
-		strings, dynamics
-	});
-	return tmpl_inst;
+	return new StringTemplateResolver(strings, ...dynamics);
 }
-TemplateStorage.prototype = {
+StringTemplateResolver.prototype = {
 	[Symbol.iterator]() {
-		const iterator = Object.create(null);
-		const {strings, dynamics} = _PRIVATES.get(this);
+		const strings  = this.strings.slice(0).reverse();
+		const dynamics = this.fields.slice(0).reverse();
 		
-		let i=-1;
-		iterator.next=()=>{
-			const max = (strings.length-1) * 2;
-			if ( i >= max ) return {done:true};
-			return (++i%2===0) ? {value:strings[i/2]} : {value:dynamics[(i-1)/2]};
+		let i=0;
+		return {
+			next:()=>{
+				if ( strings.length === 0 ) {
+					return {done:true};
+				}
+				
+				let value;
+				if ( i%2===0 ) {
+					value = strings.pop();
+				}
+				else {
+					value = dynamics.pop();
+				}
+				
+				i = i+1;
+				return {value};
+			}
 		};
-		
-		return iterator;
 	},
-	imprint(cb) {
-		if ( typeof cb !== "function" ) {
-			return undefined;
+	toString() {
+		let str = '';
+		for(const item of this) {
+			str += '' + item;
 		}
-		
-		const {strings, dynamics} = _PRIVATES.get(this);
-		return cb(strings.slice(0), ...dynamics);
+		return str;
 	}
 };
 
@@ -78,7 +88,6 @@ Object.defineProperties(String.prototype, {
 		}, configurable:true, enumerable:false
 	}
 });
-
 Object.defineProperties(String, {
 	encodeRegExpString: {
 		writable:true, configurable:true, enumerable:false,
@@ -88,6 +97,6 @@ Object.defineProperties(String, {
 	},
 	stringTemplate: {
 		writable:true, configurable:true, enumerable:false,
-		value:TemplateStorage
+		value:StringTemplateResolver
 	}
 });
