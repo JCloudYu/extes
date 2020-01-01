@@ -2,8 +2,9 @@
  *	Author: JCloudYu
  *	Create: 2019/08/30
 **/
+const writable=true, configurable=true, enumerable=false;
 Object.defineProperty(Array.prototype, 'unique', {
-	writable:true, configurable:true, enumerable:false,
+	writable, configurable, enumerable,
 	value: function(){
 		const set = new Set();
 		for ( const item of this ) set.add(item);
@@ -11,7 +12,7 @@ Object.defineProperty(Array.prototype, 'unique', {
 	}
 });
 Object.defineProperty(Array.prototype, 'exclude', {
-	writable:true, configurable:true, enumerable:false,
+	writable, configurable, enumerable,
 	value: function(reject_list) {
 		if ( !Array.isArray(reject_list) ) {
 			reject_list = [reject_list];
