@@ -1124,7 +1124,7 @@
 	
 	// NOTE: Function
 	(()=>{
-		Object.defineProperty(Function, 'encapsulate', {
+		Object.defineProperty(Function, 'sequentialExecutor', {
 			configurable, writable, enumerable,
 			value: EncapsulateSequentialExecutor
 		});
@@ -1146,11 +1146,9 @@
 			
 			const AsyncSequentialExecutor = async function(...init_args) {
 				let should_stop = false;
-				const state = {};
 				const args = init_args.slice(0);
 				const inst = {};
 				Object.defineProperties(inst, {
-					state: {get:()=>state, configurable:false, enumerable:true},
 					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
 				});
 				
@@ -1165,11 +1163,9 @@
 			};
 			const SequentialExecutor = function(...init_args) {
 				let should_stop = false;
-				const state = {};
 				const args = init_args.slice(0);
 				const inst = {};
 				Object.defineProperties(inst, {
-					state: {get:()=>state, configurable:false, enumerable:true},
 					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
 				});
 				
