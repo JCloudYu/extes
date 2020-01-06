@@ -2,16 +2,18 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
+const configurable=true, writable=true, enumerable=false;
+
 Object.defineProperty(setTimeout, 'create', {
-	writable:true, configurable:true, enumerable:false,
+	writable, configurable, enumerable,
 	value:ThrottledTimeout
 });
 Object.defineProperty(setTimeout, 'idle', {
-	writable:true, configurable:true, enumerable:false,
+	writable, configurable, enumerable,
 	value:Idle
 });
 Object.defineProperty(setInterval, 'create', {
-	writable:true, configurable:true, enumerable:false,
+	writable, configurable, enumerable,
 	value:ThrottledTimer
 });
 

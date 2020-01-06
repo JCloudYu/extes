@@ -16,37 +16,41 @@ function EncapsulateSequentialExecutor(..._functions) {
 	}
 
 	const functions = [];
+	let async_mode = false;
 	for ( const func of _functions ) {
-		if ( typeof func === "function" ) {
-			functions.push(func);
-		}
+		if ( typeof func !== "function" ) continue;
+	
+		async_mode = async_mode || func.constructor.name === "AsyncFunction";
+		functions.push(func);
 	}
 	
 	
-	const AsyncSequentialExecutor = async function(...init_args) {
+	
+	const singleton = {};
+	return function(...init_args) {
 		let should_stop = false;
 		const args = init_args.slice(0);
 		const inst = {};
 		Object.defineProperties(inst, {
+			singleton:{value:singleton, configurable:false, writable:false, enumerable:true},
 			stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
 		});
 		
-		let result = undefined;
-		for ( const func of functions ) {
-			result = await func.call(inst, ...args);
-			if ( should_stop ) break;
-			args.splice(0, args.length, result);
+		
+		
+		if ( async_mode ) {
+			return Promise.resolve()
+			.then(async()=>{
+				let result = undefined;
+				for ( const func of functions ) {
+					result = await func.call(inst, ...args);
+					if ( should_stop ) break;
+					args.splice(0, args.length, result);
+				}
+			});
 		}
 		
-		return result;
-	};
-	const SequentialExecutor = function(...init_args) {
-		let should_stop = false;
-		const args = init_args.slice(0);
-		const inst = {};
-		Object.defineProperties(inst, {
-			stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
-		});
+		
 		
 		let result = undefined;
 		for ( const func of functions ) {
@@ -57,10 +61,4 @@ function EncapsulateSequentialExecutor(..._functions) {
 		
 		return result;
 	};
-	Object.defineProperties(SequentialExecutor, {
-		async: { value:AsyncSequentialExecutor, configurable:false, writable:false, enumerable:true }
-	});
-	
-	return SequentialExecutor;
 }
-

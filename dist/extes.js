@@ -7,7 +7,7 @@
 	
 	// NOTE: Helper functions
 	const writable=true, configurable=true, enumerable=false;
-	const [IsNodeJS, Padding, UTF8Encode, UTF8Decode ] = (()=>{
+	const [IsNodeJS, Padding, UTF8Encode, UTF8Decode] = (()=>{
 		const UTF8_DECODE_CHUNK_SIZE = 100;
 		return [
 			(typeof Buffer !== "undefined" && ArrayBuffer.isView(Buffer)),
@@ -618,6 +618,67 @@
 		}
 	})();
 	
+	// NOTE: Function
+	(()=>{
+		Object.defineProperty(Function, 'sequentialExecutor', {
+			configurable, writable, enumerable,
+			value: EncapsulateSequentialExecutor
+		});
+		
+		function EncapsulateSequentialExecutor(..._functions) {
+			if ( Array.isArray(_functions[0]) ) {
+				_functions = _functions[0];
+			}
+		
+			const functions = [];
+			let async_mode = false;
+			for ( const func of _functions ) {
+				if ( typeof func !== "function" ) continue;
+			
+				async_mode = async_mode || func.constructor.name === "AsyncFunction";
+				functions.push(func);
+			}
+			
+			
+			
+			const singleton = {};
+			return function(...init_args) {
+				let should_stop = false;
+				const args = init_args.slice(0);
+				const inst = {};
+				Object.defineProperties(inst, {
+					singleton:{value:singleton, configurable:false, writable:false, enumerable:true},
+					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
+				});
+				
+				
+				
+				if ( async_mode ) {
+					return Promise.resolve()
+					.then(async()=>{
+						let result = undefined;
+						for ( const func of functions ) {
+							result = await func.call(inst, ...args);
+							if ( should_stop ) break;
+							args.splice(0, args.length, result);
+						}
+					});
+				}
+				
+				
+				
+				let result = undefined;
+				for ( const func of functions ) {
+					result = func.call(inst, ...args);
+					if ( should_stop ) break;
+					args.splice(0, args.length, result);
+				}
+				
+				return result;
+			};
+		}
+	})();
+	
 	// NOTE: HTMLElement
 	(()=>{
 		if ( typeof HTMLElement !== "undefined" ) {
@@ -1122,67 +1183,205 @@
 		}
 	})();
 	
-	// NOTE: Function
+	// NOTE: String
 	(()=>{
-		Object.defineProperty(Function, 'sequentialExecutor', {
-			configurable, writable, enumerable,
-			value: EncapsulateSequentialExecutor
+		const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
+		const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
+			return `${$1.toUpperCase()}${$2.toLowerCase()}${$3}`;
+		};
+		
+		function StringTemplateResolver(strings, ...dynamics) {
+			if ( this instanceof StringTemplateResolver ) {
+				
+				this.strings = strings;
+				this.fields = dynamics;
+				return;
+			}
+		
+			return new StringTemplateResolver(strings, ...dynamics);
+		}
+		StringTemplateResolver.prototype = {
+			[Symbol.iterator]() {
+				const strings  = this.strings.slice(0).reverse();
+				const dynamics = this.fields.slice(0).reverse();
+				
+				let i=0;
+				return {
+					next:()=>{
+						if ( strings.length === 0 ) {
+							return {done:true};
+						}
+						
+						let value;
+						if ( i%2===0 ) {
+							value = strings.pop();
+						}
+						else {
+							value = dynamics.pop();
+						}
+						
+						i = i+1;
+						return {value};
+					}
+				};
+			},
+			toString() {
+				let str = '';
+				for(const item of this) {
+					str += '' + item;
+				}
+				return str;
+			}
+		};
+		
+		
+		
+		Object.defineProperties(String.prototype, {
+			upperCase:{
+				configurable, enumerable,
+				get:function() {
+					return this.toUpperCase();
+				},
+			},
+			localeUpperCase:{
+				configurable, enumerable,
+				get:function() {
+					return this.toLocaleUpperCase();
+				}
+			},
+			lowerCase:{
+				configurable, enumerable,
+				get:function() {
+					return this.toLowerCase();
+				}
+			},
+			localeLowerCase:{
+				configurable, enumerable,
+				get:function() {
+					return this.toLocaleLowerCase();
+				}
+			},
+			toCamelCase: {
+				configurable, enumerable,
+				value:function() {
+					return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
+				}
+			},
+			camelCase: {
+				configurable, enumerable,
+				get:function() {
+					return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
+				}
+			}
+		});
+		Object.defineProperties(String, {
+			encodeRegExpString: {
+				writable, configurable, enumerable,
+				value: function(input_string='') {
+					return input_string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+				}
+			},
+			stringTemplate: {
+				writable, configurable, enumerable,
+				value:StringTemplateResolver
+			}
+		});
+	})();
+	
+	// NOTE: Timer
+	(()=>{
+		Object.defineProperty(setTimeout, 'create', {
+			writable, configurable, enumerable,
+			value:ThrottledTimeout
+		});
+		Object.defineProperty(setTimeout, 'idle', {
+			writable, configurable, enumerable,
+			value:Idle
+		});
+		Object.defineProperty(setInterval, 'create', {
+			writable, configurable, enumerable,
+			value:ThrottledTimer
 		});
 		
 		
 		
-		function EncapsulateSequentialExecutor(..._functions) {
-			if ( Array.isArray(_functions[0]) ) {
-				_functions = _functions[0];
-			}
-		
-			const functions = [];
-			for ( const func of _functions ) {
-				if ( typeof func === "function" ) {
-					functions.push(func);
-				}
-			}
-			
-			
-			const AsyncSequentialExecutor = async function(...init_args) {
-				let should_stop = false;
-				const args = init_args.slice(0);
-				const inst = {};
-				Object.defineProperties(inst, {
-					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
-				});
+		function ThrottledTimeout() {
+			let _scheduled	= null;
+			let _executing	= false;
+			let _hTimeout	= null;
+			const timeout_cb = (cb, delay=0, ...args)=>{
+				_scheduled = {cb, delay, args};
 				
-				let result = undefined;
-				for ( const func of functions ) {
-					result = await func.call(inst, ...args);
-					if ( should_stop ) break;
-					args.splice(0, args.length, result);
-				}
+				if ( _executing ) return;
 				
-				return result;
+				
+				if ( _hTimeout ) {
+					clearTimeout(_hTimeout);
+					_hTimeout = null;
+				}
+				__DO_TIMEOUT();
 			};
-			const SequentialExecutor = function(...init_args) {
-				let should_stop = false;
-				const args = init_args.slice(0);
-				const inst = {};
-				Object.defineProperties(inst, {
-					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
-				});
-				
-				let result = undefined;
-				for ( const func of functions ) {
-					result = func.call(inst, ...args);
-					if ( should_stop ) break;
-					args.splice(0, args.length, result);
+			timeout_cb.clear=()=>{
+				_scheduled = null;
+				if ( _hTimeout ) {
+					clearTimeout(_hTimeout);
+					_hTimeout = null;
 				}
-				
-				return result;
 			};
-			Object.defineProperties(SequentialExecutor, {
-				async: { value:AsyncSequentialExecutor, configurable:false, writable:false, enumerable:true }
-			});
+			return timeout_cb;
 			
-			return SequentialExecutor;
+			
+			
+			function __DO_TIMEOUT() {
+				if ( !_scheduled ) return;
+			
+				let {cb, delay, args} = _scheduled;
+				_hTimeout = setTimeout(()=>{
+					_executing = true;
+					
+					Promise.resolve(cb(...args))
+					.then(
+						()=>{
+							_executing = false;
+							_hTimeout = null;
+							
+							__DO_TIMEOUT();
+						},
+						(e)=>{
+							_executing	= false;
+							_hTimeout	= null;
+							_scheduled	= null;
+							
+							throw e;
+						}
+					);
+				}, delay);
+				_scheduled = null;
+			}
+		}
+		function Idle(duration=0) {
+			return new Promise((resolve)=>{setTimeout(resolve, duration)});
+		}
+		function ThrottledTimer() {
+			const _timeout = ThrottledTimeout();
+			const timeout_cb = (cb, interval=0, ...args)=>{
+				const ___DO_TIMEOUT=async()=>{
+						_timeout(___DO_TIMEOUT, interval);
+						
+						try {
+							await cb(...args);
+						}
+						catch(e) {
+							_timeout.clear();
+							throw e;
+						}
+					};
+				_timeout(___DO_TIMEOUT, interval, ...args);
+			};
+			timeout_cb.clear=()=>{
+				_timeout.clear();
+			};
+			return timeout_cb;
 		}
 	})();
 })();

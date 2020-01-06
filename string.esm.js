@@ -2,12 +2,12 @@
  *	Author: JCloudYu
  *	Create: 2019/07/25
 **/
+const configurable=true, writable=true, enumerable=false;
+
 const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
 const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
 	return `${$1.toUpperCase()}${$2.toLowerCase()}${$3}`;
 };
-
-
 
 function StringTemplateResolver(strings, ...dynamics) {
 	if ( this instanceof StringTemplateResolver ) {
@@ -55,48 +55,53 @@ StringTemplateResolver.prototype = {
 
 
 
-
 Object.defineProperties(String.prototype, {
 	upperCase:{
+		configurable, enumerable,
 		get:function() {
 			return this.toUpperCase();
-		}, configurable:true, enumerable:false
+		},
 	},
 	localeUpperCase:{
+		configurable, enumerable,
 		get:function() {
 			return this.toLocaleUpperCase();
-		}, configurable:true, enumerable:false
+		}
 	},
 	lowerCase:{
+		configurable, enumerable,
 		get:function() {
 			return this.toLowerCase();
-		}, configurable:true, enumerable:false
+		}
 	},
 	localeLowerCase:{
+		configurable, enumerable,
 		get:function() {
 			return this.toLocaleLowerCase();
-		}, configurable:true, enumerable:false
+		}
 	},
 	toCamelCase: {
+		configurable, enumerable,
 		value:function() {
 			return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
-		}, configurable:true, enumerable:false
+		}
 	},
 	camelCase: {
+		configurable, enumerable,
 		get:function() {
 			return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
-		}, configurable:true, enumerable:false
+		}
 	}
 });
 Object.defineProperties(String, {
 	encodeRegExpString: {
-		writable:true, configurable:true, enumerable:false,
+		writable, configurable, enumerable,
 		value: function(input_string='') {
   			return input_string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 		}
 	},
 	stringTemplate: {
-		writable:true, configurable:true, enumerable:false,
+		writable, configurable, enumerable,
 		value:StringTemplateResolver
 	}
 });
