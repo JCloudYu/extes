@@ -5,18 +5,22 @@
 const writable=true, configurable=true, enumerable=false;
 Object.defineProperty(Function, 'sequentialExecutor', {
 	configurable, writable, enumerable,
-	value: EncapsulateSequentialExecutor
+	value: EncapsulateSequentialExecutor.bind(null, false)
+});
+Object.defineProperty(Function.sequentialExecutor, 'async', {
+	configurable, writable, enumerable,
+	value: EncapsulateSequentialExecutor.bind(null, true)
 });
 
 
 
-function EncapsulateSequentialExecutor(..._functions) {
+function EncapsulateSequentialExecutor(force_async, ..._functions) {
 	if ( Array.isArray(_functions[0]) ) {
 		_functions = _functions[0];
 	}
 
 	const functions = [];
-	let async_mode = false;
+	let async_mode = force_async;
 	for ( const func of _functions ) {
 		if ( typeof func !== "function" ) continue;
 	
