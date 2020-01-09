@@ -1278,7 +1278,55 @@
 				get:function() {
 					return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
 				}
-			}
+			},
+			pop: {
+				configurable, enumerable, writable,
+				value:function(token='') {
+					if ( typeof token !== "string" ) {
+						throw new TypeError("Given token must be a string");
+					}
+					
+					if ( this === '' ) {
+						return ['', ''];
+					}
+					
+					if ( token === '' ) {
+						return [ this[0], this.substring(1) ];
+					}
+				
+					const index = this.indexOf(token, token.length);
+					if ( index < 0 ) {
+						return [this.substring(0), ''];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+			},
+			shift: {
+				configurable, enumerable, writable,
+				value:function(token='') {
+					if ( typeof token !== "string" ) {
+						throw new TypeError("Given token must be a string");
+					}
+					
+					const length = this.length;
+					if ( length === 0 ) {
+						return ['', ''];
+					}
+					
+					if ( token === '' ) {
+						return [ this.substring(0, length-1), this[length-1] ];
+					}
+				
+					const index = this.lastIndexOf(token);
+					if ( index < 0 ) {
+						return ['', this.substring(0)];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+			},
+			
 		});
 		Object.defineProperties(String, {
 			encodeRegExpString: {
