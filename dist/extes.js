@@ -668,6 +668,7 @@
 							if ( should_stop ) break;
 							args.splice(0, args.length, result);
 						}
+						return result;
 					});
 				}
 				
@@ -679,10 +680,10 @@
 					if ( should_stop ) break;
 					args.splice(0, args.length, result);
 				}
-				
 				return result;
 			};
 		}
+
 	})();
 	
 	// NOTE: HTMLElement

@@ -51,6 +51,7 @@ function EncapsulateSequentialExecutor(force_async, ..._functions) {
 					if ( should_stop ) break;
 					args.splice(0, args.length, result);
 				}
+				return result;
 			});
 		}
 		
@@ -62,7 +63,6 @@ function EncapsulateSequentialExecutor(force_async, ..._functions) {
 			if ( should_stop ) break;
 			args.splice(0, args.length, result);
 		}
-		
 		return result;
 	};
 }
