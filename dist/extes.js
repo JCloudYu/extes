@@ -653,8 +653,8 @@
 				const args = init_args.slice(0);
 				const inst = {};
 				Object.defineProperties(inst, {
-					singleton:{value:singleton, configurable:false, writable:false, enumerable:true},
-					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:true}
+					singleton:{value:singleton, configurable:false, writable:false, enumerable:false},
+					stop: {value:()=>{should_stop=true}, configurable:false, writable:false, enumerable:false}
 				});
 				
 				
@@ -683,7 +683,6 @@
 				return result;
 			};
 		}
-
 	})();
 	
 	// NOTE: HTMLElement
