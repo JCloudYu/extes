@@ -2,6 +2,9 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
+import "./_helper/misc.esm.js";
+import "./_helper/utf8.esm.js";
+
 import "./object.esm.js";
 import "./promise.esm.js";
 import "./timer.esm.js";
@@ -18,3 +21,4 @@ import "./event-target.esm.js";
 import "./error.esm.js";
 import "./document.esm.js";
 import "./function.esm.js";
+import "./ext-html-element-accessor.esm.js";

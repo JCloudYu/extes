@@ -2,7 +2,9 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
-const IS_NODE = (typeof Buffer !== "undefined");
+import {IsNodeJS} from "./_helper/misc.esm.js";
+
+
 
 const _PROMISE_THEN = Promise.prototype.then;
 const _PROMISE_CATCH = Promise.prototype.catch;
@@ -32,7 +34,7 @@ Object.defineProperties(Promise.prototype, {
 		value: function() {
 			return DecorateChainedPromise(_PROMISE_CATCH.call(this, (e)=>{
 				setTimeout(()=>{
-					if ( IS_NODE ) {
+					if ( IsNodeJS ) {
 						throw e;
 					}
 					else {
