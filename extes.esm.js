@@ -22,3 +22,4 @@ import "./error.esm.js";
 import "./document.esm.js";
 import "./function.esm.js";
 import "./ext-html-element-accessor.esm.js";
+import "./ext-error.esm.js";
