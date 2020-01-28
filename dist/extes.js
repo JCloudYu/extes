@@ -630,9 +630,9 @@
 	// NOTE: Function
 	(()=>{
 		Object.defineProperty(Function, 'sequentialExecutor', {
-			configurable, writable, enumerable,
-			value: EncapsulateSequentialExecutor.bind(null, false)
-		});
+	configurable, writable, enumerable,
+	value: EncapsulateSequentialExecutor.bind(null, false)
+});
 		Object.defineProperty(Function.sequentialExecutor, 'async', {
 			configurable, writable, enumerable,
 			value: EncapsulateSequentialExecutor.bind(null, true)
@@ -640,15 +640,20 @@
 		
 		
 		
-		function EncapsulateSequentialExecutor(force_async, ..._functions) {
-			if ( Array.isArray(_functions[0]) ) {
-				_functions = _functions[0];
+		function EncapsulateSequentialExecutor(force_async, func_list, ...bound_args) {
+			if ( !Array.isArray(func_list) ) {
+				bound_args.unshift(func_list);
+				func_list = bound_args;
+				bound_args = [];
 			}
 		
 			const functions = [];
 			let async_mode = force_async;
-			for ( const func of _functions ) {
-				if ( typeof func !== "function" ) continue;
+			for ( const func of func_list ) {
+				if ( typeof func !== "function" ) {
+					functions.push(()=>func);
+					continue;
+				}
 			
 				async_mode = async_mode || func.constructor.name === "AsyncFunction";
 				functions.push(func);
@@ -659,7 +664,7 @@
 			const singleton = {};
 			return function(...init_args) {
 				let should_stop = false;
-				const args = init_args.slice(0);
+				const args = [...bound_args, ...init_args];
 				const inst = {};
 				Object.defineProperties(inst, {
 					singleton:{value:singleton, configurable:false, writable:false, enumerable:false},
@@ -675,7 +680,11 @@
 						for ( const func of functions ) {
 							result = await func.call(inst, ...args);
 							if ( should_stop ) break;
-							args.splice(0, args.length, result);
+							args.splice(0, args.length);
+							args.push(...bound_args);
+							if ( result !== undefined ) {
+								args.push(result);
+							}
 						}
 						return result;
 					});
@@ -687,7 +696,11 @@
 				for ( const func of functions ) {
 					result = func.call(inst, ...args);
 					if ( should_stop ) break;
-					args.splice(0, args.length, result);
+					args.splice(0, args.length);
+					args.push(...bound_args);
+					if ( result !== undefined ) {
+						args.push(result);
+					}
 				}
 				return result;
 			};
@@ -1576,32 +1589,32 @@
 	// NOTE: Error expansion
 	(()=>{
 		class EError extends Error {
-			constructor(message, ...args) {
-				super(message, ...args);
-				
-				if ( Error.captureStackTrace ) {
-					Error.captureStackTrace(this, this.constructor);
-				}
-				
-				
-				
-				const now = Date.now();
-				Object.defineProperties(this, {
-					name: {
-						configurable:false, writable:false, enumerable:false,
-						value:this.constructor.name
-					},
-					time: {
-						configurable:false, writable:false, enumerable:false,
-						value:Math.floor(now/1000)
-					},
-					time_milli: {
-						configurable:false, writable:false, enumerable:false,
-						value:now
-					}
-				});
+		constructor(message, ...args) {
+			super(message, ...args);
+			
+			if ( Error.captureStackTrace ) {
+				Error.captureStackTrace(this, this.constructor);
 			}
+			
+			
+			
+			const now = Date.now();
+			Object.defineProperties(this, {
+				name: {
+					configurable:false, writable:false, enumerable:false,
+					value:this.constructor.name
+				},
+				time: {
+					configurable:false, writable:false, enumerable:false,
+					value:Math.floor(now/1000)
+				},
+				time_milli: {
+					configurable:false, writable:false, enumerable:false,
+					value:now
+				}
+			});
 		}
+	}
 		class IndexedError extends EError {
 			constructor(error_info, detail=null, ...args) {
 				if ( Object(error_info) !== error_info ) {
@@ -1665,7 +1678,7 @@
 	
 		
 		Object.defineProperties(ExtES, {
-			ExtError: {
+			EError: {
 				configurable, writable, enumerable,
 				value:EError
 			},

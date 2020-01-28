@@ -99,7 +99,7 @@ if ( typeof Error !== "undefined" ) {
 
 	
 	Object.defineProperties(ExtES, {
-		ExtError: {
+		EError: {
 			configurable, writable, enumerable,
 			value:EError
 		},
