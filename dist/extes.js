@@ -1667,7 +1667,7 @@
 					time_milli:this.time_milli
 				};
 				
-				if ( this.detail !== null || this.detail !== undefined ) {
+				if ( this.detail !== null && this.detail !== undefined ) {
 					result.detail = Object.assign({}, this.detail);
 				}
 				
