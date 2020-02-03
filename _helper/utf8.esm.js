@@ -3,6 +3,7 @@
  *	Create: 2019/07/19
 **/
 
+//@export=helper
 const UTF8_DECODE_CHUNK_SIZE = 100;
 
 /**
@@ -10,7 +11,7 @@ const UTF8_DECODE_CHUNK_SIZE = 100;
  *	@param {String} js_str
  *	@returns {Uint8Array}
 **/
-export function UTF8Encode(js_str) {
+function UTF8Encode(js_str) {
 	if ( typeof js_str !== "string" ) {
 		throw new TypeError( "Given input argument must be a js string!" );
 	}
@@ -59,7 +60,7 @@ export function UTF8Encode(js_str) {
  *	@param {ArrayBuffer|Uint8Array} raw_bytes
  *	@returns {string}
 **/
-export function UTF8Decode(raw_bytes) {
+function UTF8Decode(raw_bytes) {
 	if ( raw_bytes instanceof ArrayBuffer ) {
 		raw_bytes = new Uint8Array(raw_bytes);
 	}
@@ -116,3 +117,7 @@ export function UTF8Decode(raw_bytes) {
 	}
 	return result_string;
 }
+//@endexport
+
+
+export { UTF8Encode, UTF8Decode };

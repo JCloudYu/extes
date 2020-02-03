@@ -4,12 +4,18 @@
 **/
 const enumerable = false, configurable = true, writable = true;
 
-if ( typeof Error !== "undefined" ) {
-	Object.defineProperty(Error.prototype, 'stack_trace', {
-		get: function(){
-			if ( !this.stack ) return null;
-			return this.stack.split(/\r\n|\n/g).map((item)=>item.trim());
-		},
-		enumerable, configurable
-	});
-}
+//@export
+(()=>{
+	"use strict";
+	
+	if ( typeof Error !== "undefined" ) {
+		Object.defineProperty(Error.prototype, 'stack_trace', {
+			get: function(){
+				if ( !this.stack ) return null;
+				return this.stack.split(/\r\n|\n/g).map((item)=>item.trim());
+			},
+			enumerable, configurable
+		});
+	}
+})();
+//@endexport

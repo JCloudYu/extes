@@ -2,14 +2,20 @@
  *	Author: JCloudYu
  *	Create: 2019/08/28
 **/
-if ( typeof HTMLInputElement !== "undefined" ) {
-	const configurable = true, writable = true, enumerable = false;
+const configurable = true, writable = true, enumerable = false;
+
+//@export
+(()=>{
+	"use strict";
 	
-	Object.defineProperty( HTMLInputElement.prototype, 'setValue', {
-		configurable, writable, enumerable,
-		value: function(value) {
-			this.value = value;
-			return this;
-		}
-	});
-}
+	if ( typeof HTMLInputElement !== "undefined" ) {
+		Object.defineProperty( HTMLInputElement.prototype, 'setValue', {
+			configurable, writable, enumerable,
+			value: function(value) {
+				this.value = value;
+				return this;
+			}
+		});
+	}
+})();
+//@endexport
