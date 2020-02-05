@@ -707,7 +707,16 @@ function UTF8Decode(raw_bytes) {
 				};
 				
 				if ( this.detail !== null && this.detail !== undefined ) {
-					result.detail = Object.assign({}, this.detail);
+					if ( Array.isArray(this.detail) ) {
+						result.detail = this.detail.slice(0);
+					}
+					else
+					if ( Object(this.detail) === this.detail ) {
+						result.detail = Object.assign({}, this.detail);
+					}
+					else {
+						result.detail = this.detail;
+					}
 				}
 				
 				return result;
