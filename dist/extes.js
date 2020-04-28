@@ -865,6 +865,9 @@ function UTF8Decode(raw_bytes) {
 						value:element
 					}
 				});
+				
+				element.removeAttribute('elm-export-tmpl');
+				element.removeAttribute('elm-export');
 			}
 			produce() {
 				console.warn("HTMLElementTemplate::produce is deprecated! Please use HTMLElementTemplate::duplicate instead!");

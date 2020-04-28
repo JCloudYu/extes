@@ -112,6 +112,9 @@ const configurable = true, writable = true, enumerable = false;
 						value:element
 					}
 				});
+				
+				element.removeAttribute('elm-export-tmpl');
+				element.removeAttribute('elm-export');
 			}
 			produce() {
 				console.warn("HTMLElementTemplate::produce is deprecated! Please use HTMLElementTemplate::duplicate instead!");
