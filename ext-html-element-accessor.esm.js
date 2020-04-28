@@ -44,8 +44,11 @@ const configurable = true, writable = true, enumerable = false;
 				const {element, exported} = _PRIVATE;
 				const exported_items = element.querySelectorAll('[elm-export]');
 				for( const item of exported_items ) {
+					if ( item.matches('[elm-export][elm-export-tmpl] [elm-export]') ) { continue; }
+				
 					const export_name = item.getAttribute('elm-export');
-					exported[export_name] = item;
+					const is_tmpl = item.hasAttribute('elm-export-tmpl');
+					exported[export_name] = is_tmpl ? new HTMLElementTemplate(item) : item;
 				}
 			}
 		}

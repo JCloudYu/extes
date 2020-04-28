@@ -9,6 +9,30 @@ const configurable=true, writable=true, enumerable=false;
 (()=>{
 	"use strict";
 
+	Object.defineProperty(Date, 'unix', {
+		writable, configurable, enumerable,
+		value: function() {
+			return Math.floor(Date.now()/1000);
+		}
+	});
+	Object.defineProperty(Date.prototype, 'getUnixTime', {
+		writable, configurable, enumerable,
+		value: function() {
+			return Math.floor(this.getTime()/1000);
+		}
+	});
+	Object.defineProperty(Date.prototype, 'unix', {
+		configurable, enumerable,
+		get: function() {
+			return Math.floor(this.getTime()/1000);
+		}
+	});
+	Object.defineProperty(Date.prototype, 'time', {
+		configurable, enumerable,
+		get: function() {
+			return this.getTime();
+		}
+	});
 	Object.defineProperty(Date.prototype, 'toLocaleISOString', {
 		writable, configurable, enumerable,
 		value: function(){

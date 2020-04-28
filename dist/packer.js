@@ -252,11 +252,8 @@
 		this.dynamics = dynamics;
 	}
 	function WriteToStream(stream, data){
-		return new Promise((resolve, reject)=>{
-			const should_wait = stream.write(data, ()=>resolve(true));
-			if( !should_wait ){
-				reject(false);
-			}
+		return new Promise((resolve)=>{
+			stream.write(data, ()=>resolve(true));
 		});
 	}
 	function CloseStream(stream){
