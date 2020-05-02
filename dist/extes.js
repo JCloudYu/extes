@@ -793,16 +793,8 @@ function UTF8Decode(raw_bytes) {
 				const _PRIVATE = _PRIVATES.get(this);
 				_PRIVATE.exported = Object.create(null);
 				
-				
 				const {element, exported} = _PRIVATE;
-				const exported_items = element.querySelectorAll('[elm-export]');
-				for( const item of exported_items ) {
-					if ( item.matches('[elm-export][elm-export-tmpl] [elm-export]') ) { continue; }
-				
-					const export_name = item.getAttribute('elm-export');
-					const is_tmpl = item.hasAttribute('elm-export-tmpl');
-					exported[export_name] = is_tmpl ? new HTMLElementTemplate(item) : item;
-				}
+				__RESOLVE_ACCESSOR(exported, element);
 			}
 		}
 		const HTMLElementAccessorProxy = {
@@ -812,6 +804,7 @@ function UTF8Decode(raw_bytes) {
 			get: function(obj, prop) {
 				const {element, exported, func_bind, func_relink} = _PRIVATES.get(obj);
 				if ( prop === 'element' ) return element;
+				if ( prop === 'is_accessor' ) return true;
 				if ( prop === 'bind' ) return func_bind;
 				if ( prop === 'relink' ) return func_relink;
 				
@@ -869,6 +862,7 @@ function UTF8Decode(raw_bytes) {
 				element.removeAttribute('elm-export-tmpl');
 				element.removeAttribute('elm-export');
 			}
+			get is_template() { return true; }
 			produce() {
 				console.warn("HTMLElementTemplate::produce is deprecated! Please use HTMLElementTemplate::duplicate instead!");
 				return this.duplicate();
@@ -890,6 +884,36 @@ function UTF8Decode(raw_bytes) {
 				value:HTMLElementAccessor
 			}
 		});
+		
+		
+		
+		function __RESOLVE_ACCESSOR(exports, element) {
+			const candidates = [];
+			for (const item of element.children) {
+				if ( !item.hasAttribute('elm-export') ) {
+					candidates.push(item);
+					continue;
+				}
+				
+				const export_name = item.getAttribute('elm-export');
+				if ( item.hasAttribute('elm-export-tmpl') ) {
+					exports[export_name] = new HTMLElementTemplate(item);
+					continue;
+				}
+				
+				if ( item.hasAttribute('elm-export-accessor') ) {
+					exports[export_name] = new HTMLElementAccessor(item);
+					continue;
+				}
+				
+				candidates.push(item);
+				exports[export_name] = item;
+			}
+			
+			for(const elm of candidates) {
+				__RESOLVE_ACCESSOR(exports, elm);
+			}
+		}
 	}
 })();
 (()=>{
