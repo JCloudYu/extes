@@ -638,7 +638,7 @@ function UTF8Decode(raw_bytes) {
 					event = new Event(event);
 				}
 				
-				if ( event instanceof Event ) {
+				if ( !(event instanceof Event) ) {
 					throw new TypeError("Argument 1 accepts only string or Event instance!");
 				}
 				
