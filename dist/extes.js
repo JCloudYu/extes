@@ -606,7 +606,6 @@ function UTF8Decode(raw_bytes) {
 	"use strict";
 	
 	if ( typeof EventTarget !== "undefined" ) {
-	
 		Object.defineProperty(EventTarget.prototype, 'on', {
 			configurable, writable, enumerable,
 			value: function(event_name, callback) {
@@ -766,6 +765,8 @@ function UTF8Decode(raw_bytes) {
 		const _PRIVATES = new WeakMap();
 		class _HTMLElementAccessor {
 			constructor(element=null) {
+				console.warn( "HTMLElementAccessor is marked as deprecated and will no longer updated! Please use WhelmJS (https://github.com/JCloudYu/whelm-js) instead!" );
+				
 				const _PRIVATE = Object.assign(Object.create(null), {
 					element:null, exported:Object.create(null),
 					func_bind: _HTMLElementAccessor.prototype.bind.bind(this),
@@ -833,6 +834,8 @@ function UTF8Decode(raw_bytes) {
 		});
 		class HTMLElementTemplate {
 			constructor(element) {
+				console.warn( "HTMLElementTemplate is marked as deprecated and will no longer updated! Please use WhelmJS (https://github.com/JCloudYu/whelm-js) instead!" );
+				
 				if ( typeof element === "string" ) {
 					var tmp = document.implementation.createHTMLDocument();
 					tmp.body.innerHTML = element;
@@ -1619,33 +1622,10 @@ function UTF8Decode(raw_bytes) {
 				return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
 			}
 		},
-		pop: {
+		pull: {
 			configurable, enumerable, writable,
-			value:function(token='') {
-				if ( typeof token !== "string" ) {
-					throw new TypeError("Given token must be a string");
-				}
-				
-				if ( this === '' ) {
-					return ['', ''];
-				}
-				
-				if ( token === '' ) {
-					return [ this[0], this.substring(1) ];
-				}
-			
-				const index = this.indexOf(token, token.length);
-				if ( index < 0 ) {
-					return [this.substring(0), ''];
-				}
-				
-				return [this.substring(0, index), this.substring(index)];
-			}
-		},
-		shift: {
-			configurable, enumerable, writable,
-			value:function(token='') {
-				if ( typeof token !== "string" ) {
+			value:function(token_separator='', from_begin=true) {
+				if ( typeof token_separator !== "string" ) {
 					throw new TypeError("Given token must be a string");
 				}
 				
@@ -1654,16 +1634,39 @@ function UTF8Decode(raw_bytes) {
 					return ['', ''];
 				}
 				
-				if ( token === '' ) {
-					return [ this.substring(0, length-1), this[length-1] ];
-				}
-			
-				const index = this.lastIndexOf(token);
-				if ( index < 0 ) {
-					return ['', this.substring(0)];
+				if ( token_separator === '' ) {
+					return from_begin ? [ this[0], this.substring(1) ] : [ this.substring(0, length-1), this[length-1] ];
 				}
 				
-				return [this.substring(0, index), this.substring(index)];
+				
+				if ( from_begin ) {
+					const index = this.indexOf(token_separator, token_separator.length);
+					if ( index < 0 ) {
+						return [this.substring(0), ''];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+				else {
+					const index = this.lastIndexOf(token_separator);
+					if ( index < 0 ) {
+						return ['', this.substring(0)];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+			}
+		},
+		pop: {
+			configurable, enumerable, writable,
+			value:function(token_separator='') {
+				return this.pull(token_separator, true);
+			}
+		},
+		shift: {
+			configurable, enumerable, writable,
+			value:function(token_separator='') {
+				return this.pull(token_separator, false);
 			}
 		}
 	});

@@ -13,6 +13,8 @@ const configurable = true, writable = true, enumerable = false;
 		const _PRIVATES = new WeakMap();
 		class _HTMLElementAccessor {
 			constructor(element=null) {
+				console.warn( "HTMLElementAccessor is marked as deprecated and will no longer updated! Please use WhelmJS (https://github.com/JCloudYu/whelm-js) instead!" );
+				
 				const _PRIVATE = Object.assign(Object.create(null), {
 					element:null, exported:Object.create(null),
 					func_bind: _HTMLElementAccessor.prototype.bind.bind(this),
@@ -80,6 +82,8 @@ const configurable = true, writable = true, enumerable = false;
 		});
 		class HTMLElementTemplate {
 			constructor(element) {
+				console.warn( "HTMLElementTemplate is marked as deprecated and will no longer updated! Please use WhelmJS (https://github.com/JCloudYu/whelm-js) instead!" );
+				
 				if ( typeof element === "string" ) {
 					var tmp = document.implementation.createHTMLDocument();
 					tmp.body.innerHTML = element;

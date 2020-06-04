@@ -9,7 +9,6 @@ const configurable = true, writable = true, enumerable = false;
 	"use strict";
 	
 	if ( typeof EventTarget !== "undefined" ) {
-	
 		Object.defineProperty(EventTarget.prototype, 'on', {
 			configurable, writable, enumerable,
 			value: function(event_name, callback) {

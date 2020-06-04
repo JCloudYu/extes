@@ -96,33 +96,10 @@ const configurable=true, writable=true, enumerable=false;
 				return this.replace(CAMEL_CASE_PATTERN, CAMEL_REPLACER);
 			}
 		},
-		pop: {
+		pull: {
 			configurable, enumerable, writable,
-			value:function(token='') {
-				if ( typeof token !== "string" ) {
-					throw new TypeError("Given token must be a string");
-				}
-				
-				if ( this === '' ) {
-					return ['', ''];
-				}
-				
-				if ( token === '' ) {
-					return [ this[0], this.substring(1) ];
-				}
-			
-				const index = this.indexOf(token, token.length);
-				if ( index < 0 ) {
-					return [this.substring(0), ''];
-				}
-				
-				return [this.substring(0, index), this.substring(index)];
-			}
-		},
-		shift: {
-			configurable, enumerable, writable,
-			value:function(token='') {
-				if ( typeof token !== "string" ) {
+			value:function(token_separator='', from_begin=true) {
+				if ( typeof token_separator !== "string" ) {
 					throw new TypeError("Given token must be a string");
 				}
 				
@@ -131,16 +108,39 @@ const configurable=true, writable=true, enumerable=false;
 					return ['', ''];
 				}
 				
-				if ( token === '' ) {
-					return [ this.substring(0, length-1), this[length-1] ];
-				}
-			
-				const index = this.lastIndexOf(token);
-				if ( index < 0 ) {
-					return ['', this.substring(0)];
+				if ( token_separator === '' ) {
+					return from_begin ? [ this[0], this.substring(1) ] : [ this.substring(0, length-1), this[length-1] ];
 				}
 				
-				return [this.substring(0, index), this.substring(index)];
+				
+				if ( from_begin ) {
+					const index = this.indexOf(token_separator, token_separator.length);
+					if ( index < 0 ) {
+						return [this.substring(0), ''];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+				else {
+					const index = this.lastIndexOf(token_separator);
+					if ( index < 0 ) {
+						return ['', this.substring(0)];
+					}
+					
+					return [this.substring(0, index), this.substring(index)];
+				}
+			}
+		},
+		pop: {
+			configurable, enumerable, writable,
+			value:function(token_separator='') {
+				return this.pull(token_separator, true);
+			}
+		},
+		shift: {
+			configurable, enumerable, writable,
+			value:function(token_separator='') {
+				return this.pull(token_separator, false);
 			}
 		}
 	});
