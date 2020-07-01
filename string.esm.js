@@ -2,6 +2,8 @@
  *	Author: JCloudYu
  *	Create: 2019/07/25
 **/
+import {UTF8Decode} from "./_helper/utf8.esm.js";
+import {ExtractArrayBuffer} from "./_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
@@ -154,6 +156,19 @@ const configurable=true, writable=true, enumerable=false;
 		stringTemplate: {
 			writable, configurable, enumerable,
 			value:StringTemplateResolver
+		},
+		from: {
+			writable, configurable, enumerable,
+			value:(content)=>{
+				if ( typeof content === "string" ) return content;
+				
+				const buff = ExtractArrayBuffer(content);
+				if ( buff !== null ) {
+					return UTF8Decode(new Uint8Array(buff));
+				}
+				
+				return ''+content;
+			}
 		}
 	});
 })();

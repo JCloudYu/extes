@@ -3,6 +3,7 @@
  *	Create: 2019/07/19
 **/
 import {UTF8Encode} from "./_helper/utf8.esm.js";
+import {ExtractArrayBuffer} from "./_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
@@ -248,6 +249,37 @@ const configurable=true, writable=true, enumerable=false;
 			
 			return a.compare(b);
 		}
+	});
+	Object.defineProperty(ArrayBuffer, 'concat', {
+		configurable, writable, enumerable,
+		value: function(...args) {
+		if ( Array.isArray(args[0]) ) {
+			args = args[0];
+		}
+		
+		let temp = 0;
+		for(let i=0; i<args.length; i++) {
+			let arg = ExtractArrayBuffer(args[i]);
+			if (!(arg instanceof ArrayBuffer)) {
+				throw new TypeError("ArrayBuffer.combine accept only ArrayBuffer, TypeArray and DataView.");
+			}
+			
+			args[i] = new Uint8Array(arg);
+			temp += arg.byteLength;
+		}
+		
+		const buff = new Uint8Array(temp);
+		
+		
+		
+		temp = 0;
+		for(const arg of args) {
+			buff.set(arg, temp);
+			temp += arg.length;
+		}
+		
+		return buff.buffer;
+	}
 	});
 })();
 //@endexport

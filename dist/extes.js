@@ -13,6 +13,24 @@ function Padding(val, length=2, stuffing='0'){
 	}
 	return val;
 }
+function ExtractArrayBuffer(content) {
+	if ( IsNodeJS ) {
+		if ( Buffer.isBuffer(content) ) {
+			return (new Uint8Array(content)).buffer;
+		}
+	}
+	
+	if ( ArrayBuffer.isView(content) ) {
+		return content.buffer;
+	}
+	
+	if ( content instanceof ArrayBuffer ){
+		return content;
+	}
+	
+	
+	return null;
+}
 const UTF8_DECODE_CHUNK_SIZE = 100;
 
 /**
@@ -369,6 +387,37 @@ function UTF8Decode(raw_bytes) {
 			
 			return a.compare(b);
 		}
+	});
+	Object.defineProperty(ArrayBuffer, 'concat', {
+		configurable, writable, enumerable,
+		value: function(...args) {
+		if ( Array.isArray(args[0]) ) {
+			args = args[0];
+		}
+		
+		let temp = 0;
+		for(let i=0; i<args.length; i++) {
+			let arg = ExtractArrayBuffer(args[i]);
+			if (!(arg instanceof ArrayBuffer)) {
+				throw new TypeError("ArrayBuffer.combine accept only ArrayBuffer, TypeArray and DataView.");
+			}
+			
+			args[i] = new Uint8Array(arg);
+			temp += arg.byteLength;
+		}
+		
+		const buff = new Uint8Array(temp);
+		
+		
+		
+		temp = 0;
+		for(const arg of args) {
+			buff.set(arg, temp);
+			temp += arg.length;
+		}
+		
+		return buff.buffer;
+	}
 	});
 })();
 (()=>{
@@ -1680,6 +1729,19 @@ function UTF8Decode(raw_bytes) {
 		stringTemplate: {
 			writable, configurable, enumerable,
 			value:StringTemplateResolver
+		},
+		from: {
+			writable, configurable, enumerable,
+			value:(content)=>{
+				if ( typeof content === "string" ) return content;
+				
+				const buff = ExtractArrayBuffer(content);
+				if ( buff !== null ) {
+					return UTF8Decode(new Uint8Array(buff));
+				}
+				
+				return ''+content;
+			}
 		}
 	});
 })();

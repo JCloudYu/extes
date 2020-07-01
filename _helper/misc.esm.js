@@ -16,10 +16,28 @@ function Padding(val, length=2, stuffing='0'){
 	}
 	return val;
 }
+function ExtractArrayBuffer(content) {
+	if ( IsNodeJS ) {
+		if ( Buffer.isBuffer(content) ) {
+			return (new Uint8Array(content)).buffer;
+		}
+	}
+	
+	if ( ArrayBuffer.isView(content) ) {
+		return content.buffer;
+	}
+	
+	if ( content instanceof ArrayBuffer ){
+		return content;
+	}
+	
+	
+	return null;
+}
 //@endexport
 
 
 
 export {
-	IsNodeJS, Padding, ExtES
+	IsNodeJS, Padding, ExtES, ExtractArrayBuffer
 };
