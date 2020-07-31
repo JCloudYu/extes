@@ -16,7 +16,6 @@ const configurable = true, writable = true, enumerable = false;
 				const inserted = [];
 				const events = event_name.split(',');
 				for( let evt_name of events ) {
-					[evt_name] = evt_name.split('#');
 					evt_name = evt_name.trim();
 					if ( inserted.indexOf(evt_name) >= 0 ) continue;
 					
@@ -29,7 +28,11 @@ const configurable = true, writable = true, enumerable = false;
 		Object.defineProperty(EventTarget.prototype, 'off', {
 			configurable, writable, enumerable,
 			value: function(event_name, callback) {
-				this.removeEventListener(event_name, callback);
+				const events = event_name.split(',');
+				for( let evt_name of events ) {
+					evt_name = evt_name.trim();
+					this.removeEventListener(evt_name, callback);
+				}
 				return this;
 			}
 		});
