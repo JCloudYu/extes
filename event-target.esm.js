@@ -38,15 +38,24 @@ const configurable = true, writable = true, enumerable = false;
 		});
 		Object.defineProperty(EventTarget.prototype, 'emit', {
 			configurable, writable, enumerable,
-			value: function(event) {
+			value: function(event, inits={}) {
+				const {bubbles, cancelable, composed, ...event_args} = inits;
+				
 				if ( typeof event === "string" ) {
-					event = new Event(event);
+					event = new Event(event, {
+						bubbles:!!bubbles,
+						cancelable:!!cancelable,
+						composed:!!composed
+					});
 				}
 				
 				if ( !(event instanceof Event) ) {
 					throw new TypeError("Argument 1 accepts only string or Event instance!");
 				}
 				
+				
+				
+				Object.assign(event, event_args);
 				this.dispatchEvent(event);
 			}
 		});
