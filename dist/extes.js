@@ -455,6 +455,52 @@ function UTF8Decode(raw_bytes) {
 			return new_ary;
 		}
 	});
+	
+	Object.defineProperty(Array, 'concat', {
+		writable, configurable, enumerable,
+		value: function(...elements) {
+			const result = [];
+			for(const element of elements) {
+				if ( !Array.isArray(element) ) {
+					result.push(element);
+					continue;
+				}
+				
+				for(const elm of element) {
+					result.push(elm);
+				}
+			}
+			
+			return result;
+		}
+	});
+	
+	Object.defineProperty(Array, 'intersect', {
+		writable, configurable, enumerable,
+		value: function(...arrays) {
+			let result = arrays[0]||[];
+			if ( !Array.isArray(result) ) {
+				throw new TypeError(`Array.intersect only accepts list array arguments!`);
+			}
+			
+			for(let i=1; i<arrays.length; i++) {
+				const array = arrays[i];
+				if ( !Array.isArray(array) ) {
+					throw new TypeError(`Array.intersect only accepts list array arguments!`);
+				}
+				
+				const new_result = new Set();
+				for(const elm of result) {
+					if ( array.indexOf(elm) >= 0 ) {
+						new_result.add(elm);
+					}
+				}
+				
+				result = Array.from(new_result);
+			}
+			return result;
+		}
+	})
 })();
 (()=>{
 	"use strict";
