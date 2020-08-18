@@ -20,13 +20,15 @@ const configurable=true, writable=true, enumerable=false;
 		"c":12, "d":13, "e":14, "f":15
 	};
 	
+	
+	
 	Object.defineProperty(ArrayBuffer.prototype, 'bytes', {
 		configurable, enumerable,
 		get:function(){ return new Uint8Array(this); }
 	});
 	Object.defineProperty(ArrayBuffer.prototype, 'toString', {
 		configurable, writable, enumerable,
-		value:function(format=16, padding=false){
+		value:function(format=16, padding=true){
 			const bytes = new Uint8Array(this);
 			
 			let result = '';
