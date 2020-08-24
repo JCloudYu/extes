@@ -6,8 +6,6 @@ const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-
 	if ( typeof Node !== "undefined" ) {
 		Object.defineProperty( Node.prototype, 'prependChild', {
 			configurable, writable, enumerable,
@@ -42,15 +40,6 @@ const configurable = true, writable = true, enumerable = false;
 			configurable, writable, enumerable,
 			value: function(text) {
 				this.textContent = text;
-				return this;
-			}
-		});
-		Object.defineProperty( Node.prototype, 'process', {
-			configurable, writable, enumerable,
-			value: function(processor, ...args) {
-				if ( typeof processor === "function" ) {
-					processor.call(this, ...args);
-				}
 				return this;
 			}
 		});

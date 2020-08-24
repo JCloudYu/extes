@@ -2,13 +2,11 @@
  *	Author: JCloudYu
  *	Create: 2019/09/20
 **/
-import {Padding} from "./_helper/misc.esm.js";
+import {Padding} from "_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-
 	Object.defineProperty(Date, 'unix', {
 		writable, configurable, enumerable,
 		value: function() {

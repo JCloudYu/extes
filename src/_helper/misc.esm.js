@@ -4,10 +4,6 @@
 **/
 //@export=helper
 const IsNodeJS = (typeof Buffer !== "undefined");
-const ExtES=(()=>{
-	const GLOBAL = IsNodeJS ? global : window;
-	return GLOBAL.ExtES = Object.create(null);
-})();
 function Padding(val, length=2, stuffing='0'){
 	val = `${val}`;
 	let remain = length - val.length;
@@ -39,5 +35,5 @@ function ExtractArrayBuffer(content) {
 
 
 export {
-	IsNodeJS, Padding, ExtES, ExtractArrayBuffer
+	IsNodeJS, Padding, ExtractArrayBuffer
 };

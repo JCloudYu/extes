@@ -2,14 +2,12 @@
  *	Author: JCloudYu
  *	Create: 2019/07/19
 **/
-import {UTF8Encode} from "./_helper/utf8.esm.js";
-import {ExtractArrayBuffer} from "./_helper/misc.esm.js";
+import {UTF8Encode} from "_helper/utf8.esm.js";
+import {ExtractArrayBuffer} from "_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-
 	const HEX_FORMAT = /^(0x)?([0-9a-fA-F]+)$/;
 	const BIT_FORMAT = /^(0b|0B)?([01]+)$/;
 	const HEX_MAP	 = "0123456789abcdef";

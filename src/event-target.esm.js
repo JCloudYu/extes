@@ -6,8 +6,6 @@ const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	if ( typeof EventTarget !== "undefined" ) {
 		Object.defineProperty(EventTarget.prototype, 'on', {
 			configurable, writable, enumerable,

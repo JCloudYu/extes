@@ -6,8 +6,6 @@ const writable=true, configurable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-
 	Object.defineProperty(Array.prototype, 'unique', {
 		writable, configurable, enumerable,
 		value: function(){
@@ -59,7 +57,6 @@ const writable=true, configurable=true, enumerable=false;
 			return result;
 		}
 	});
-	
 	Object.defineProperty(Array, 'intersect', {
 		writable, configurable, enumerable,
 		value: function(...arrays) {

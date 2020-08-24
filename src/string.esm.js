@@ -2,14 +2,12 @@
  *	Author: JCloudYu
  *	Create: 2019/07/25
 **/
-import {UTF8Decode} from "./_helper/utf8.esm.js";
-import {ExtractArrayBuffer} from "./_helper/misc.esm.js";
+import {UTF8Decode} from "_helper/utf8.esm.js";
+import {ExtractArrayBuffer} from "_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
 	const CAMEL_REPLACER = (match, $1, $2, $3, index, input )=>{
 		return `${$1.toUpperCase()}${$2.toLowerCase()}${$3}`;
@@ -153,7 +151,7 @@ const configurable=true, writable=true, enumerable=false;
 				return input_string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 			}
 		},
-		stringTemplate: {
+		template: {
 			writable, configurable, enumerable,
 			value:StringTemplateResolver
 		},

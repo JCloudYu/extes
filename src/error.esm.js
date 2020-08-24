@@ -6,8 +6,6 @@ const enumerable = false, configurable = true, writable = true;
 
 //@export
 (()=>{
-	"use strict";
-	
 	if ( typeof Error !== "undefined" ) {
 		Object.defineProperty(Error.prototype, 'stack_trace', {
 			get: function(){

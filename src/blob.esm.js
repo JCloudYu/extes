@@ -6,8 +6,6 @@ const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-
 	if ( typeof Blob !== "undefined" ) {
 		Object.defineProperty(Blob.prototype, 'arrayBuffer', {
 			configurable, writable, enumerable,

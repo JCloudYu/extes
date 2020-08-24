@@ -6,8 +6,6 @@ const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	if ( typeof HTMLInputElement !== "undefined" ) {
 		Object.defineProperty( HTMLInputElement.prototype, 'setValue', {
 			configurable, writable, enumerable,

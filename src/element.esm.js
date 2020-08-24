@@ -6,8 +6,6 @@ const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-
 	if ( typeof Element !== "undefined" ) {
 		const _ELEMENT_SET_ATTRIBUTE		= Element.prototype.setAttribute;
 		const _ELEMENT_REMOVE_ATTRIBUTE		= Element.prototype.removeAttribute;
@@ -80,6 +78,5 @@ const configurable = true, writable = true, enumerable = false;
 			},
 		});
 	}
-
 })();
 //@endexport

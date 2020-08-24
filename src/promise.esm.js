@@ -2,13 +2,11 @@
  *	Author: JCloudYu
  *	Create: 2019/07/12
 **/
-import {IsNodeJS} from "./_helper/misc.esm.js";
+import {IsNodeJS} from "_helper/misc.esm.js";
 const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	const _PROMISE_THEN = Promise.prototype.then;
 	const _PROMISE_CATCH = Promise.prototype.catch;
 	const _PROMISE_FINALLY = Promise.prototype.finally;
@@ -116,13 +114,9 @@ const configurable=true, writable=true, enumerable=false;
 	}
 	function DecorateChainedPromise(next_promise, previous) {
 		for( const prop of Object.keys(previous)) {
-			if ( prop === "_prev" ) continue;
 			next_promise[prop] = previous[prop];
 		}
 		
-		Object.defineProperty(next_promise, '_prev', {
-			value:previous, configurable, enumerable, writable
-		});
 		return next_promise;
 	}
 })();

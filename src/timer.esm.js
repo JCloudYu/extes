@@ -6,8 +6,6 @@ const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	Object.defineProperty(setTimeout, 'create', {
 		writable, configurable, enumerable,
 		value:ThrottledTimeout

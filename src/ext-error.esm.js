@@ -2,13 +2,10 @@
  *	Author: JCloudYu
  *	Create: 2020/01/27
 **/
-import {ExtES} from "./_helper/misc.esm.js";
 const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-
 	if ( typeof Error !== "undefined" ) {
 		class EError extends Error {
 			constructor(message, ...args) {
@@ -106,7 +103,7 @@ const configurable = true, writable = true, enumerable = false;
 			}
 		}
 		
-		Object.defineProperties(ExtES, {
+		Object.defineProperties(Error, {
 			EError: {
 				configurable, writable, enumerable,
 				value:EError

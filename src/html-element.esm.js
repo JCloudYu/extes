@@ -6,8 +6,6 @@ const configurable = true, writable = true, enumerable = false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	if ( typeof HTMLElement !== "undefined" ) {
 		Object.defineProperties(HTMLElement.prototype, {
 			setData: {

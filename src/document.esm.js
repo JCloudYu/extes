@@ -6,8 +6,6 @@ const configurable=true, writable=true, enumerable=false;
 
 //@export
 (()=>{
-	"use strict";
-	
 	if ( typeof Document !== "undefined" ) {
 		Object.defineProperties(Document.prototype, {
 			parseHTML: {
