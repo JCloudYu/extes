@@ -1,10 +1,10 @@
 {
 	"name": "extes",
-	"version": "3.0.3",
+	"version": "3.0.4",
 	"description": "A tiny library that extends native js with some handy tools",
 	"main": "extes.js",
 	"scripts": {
-		"pack": "node ./build/packer.js ./build/src ./build/tmpl.js -o ./extes.js"
+		"pack": "node ./build/packer.js ./build/src ./build/tmpl.js -o ./extes.js && terser -c -m -- ./extes.js > ./extes.min.js"
 	},
 	"keywords": [
 		"ECMAScript",
