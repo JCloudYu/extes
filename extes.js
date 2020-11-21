@@ -3,7 +3,7 @@
 	
 	const writable = true, configurable = true, enumerable = false;
 	const IsNodeJS = (typeof Buffer !== "undefined");
-	function Padding(val, length = 2, stuffing = '0'){
+	function Padding(val, length = 2, stuffing = '0') {
 		val = `${ val }`;
 		let remain = length - val.length;
 		while( remain-- > 0 ){
@@ -11,31 +11,27 @@
 		}
 		return val;
 	}
-	function ExtractArrayBuffer(content){
+	function ExtractBytes(content) {
 		if( IsNodeJS ){
 			if( Buffer.isBuffer(content) ){
-				return (new Uint8Array(content)).buffer;
+				return new Uint8Array(content);
 			}
 		}
 		
 		if( ArrayBuffer.isView(content) ){
-			return content.buffer;
+			return new Uint8Array(content.buffer);
 		}
 		
 		if( content instanceof ArrayBuffer ){
-			return content;
+			return new Uint8Array(content);
 		}
 		
 		
 		return null;
 	}
-	const UTF8_DECODE_CHUNK_SIZE = 100;
 	
-	/**
-	 *	Encode given input js string using utf8 format
-	 *	@param {String} js_str
-	 *	@returns {Uint8Array}
-	 **/
+	
+	const UTF8_DECODE_CHUNK_SIZE = 100;
 	function UTF8Encode(js_str){
 		if( typeof js_str !== "string" ){
 			throw new TypeError("Given input argument must be a js string!");
@@ -79,12 +75,6 @@
 		}
 		return new Uint8Array(codePoints);
 	}
-	
-	/**
-	 *	Decode given input buffer using utf8 format
-	 *	@param {ArrayBuffer|Uint8Array} raw_bytes
-	 *	@returns {string}
-	 **/
 	function UTF8Decode(raw_bytes){
 		if( raw_bytes instanceof ArrayBuffer ){
 			raw_bytes = new Uint8Array(raw_bytes);
@@ -143,6 +133,8 @@
 		return result_string;
 	}
 	
+	
+	// ArrayBuffer
 	(()=>{
 		const HEX_FORMAT = /^(0x)?([0-9a-fA-F]+)$/;
 		const BIT_FORMAT = /^(0b|0B)?([01]+)$/;
@@ -153,12 +145,19 @@
 			"8": 8, "9": 9, "a": 10, "b": 11,
 			"c": 12, "d": 13, "e": 14, "f": 15
 		};
+		const REF = new WeakMap();
 		
 		
 		
 		Object.defineProperty(ArrayBuffer.prototype, 'bytes', {
 			configurable, enumerable,
-			get: function(){ return new Uint8Array(this); }
+			get: function(){
+				let ref = REF.get(this);
+				if ( ref ) return ref;
+				
+				REF.set(this, ref = new Uint8Array(this));
+				return ref;
+			}
 		});
 		Object.defineProperty(ArrayBuffer.prototype, 'toString', {
 			configurable, writable, enumerable,
@@ -394,12 +393,11 @@
 				
 				let temp = 0;
 				for( let i = 0; i < args.length; i++ ){
-					let arg = ExtractArrayBuffer(args[i]);
-					if( !(arg instanceof ArrayBuffer) ){
+					const arg = args[i] = ExtractBytes(args[i]);
+					if( !(arg instanceof Uint8Array) ){
 						throw new TypeError("ArrayBuffer.combine accept only ArrayBuffer, TypeArray and DataView.");
 					}
 					
-					args[i] = new Uint8Array(arg);
 					temp += arg.byteLength;
 				}
 				
@@ -417,6 +415,8 @@
 			}
 		});
 	})();
+	
+	// Array
 	(()=>{
 		Object.defineProperty(Array.prototype, 'unique', {
 			writable, configurable, enumerable,
@@ -496,6 +496,8 @@
 			}
 		})
 	})();
+	
+	// Blob
 	(()=>{
 		if( typeof Blob !== "undefined" ){
 			Object.defineProperty(Blob.prototype, 'arrayBuffer', {
@@ -511,6 +513,8 @@
 			});
 		}
 	})();
+	
+	// Date
 	(()=>{
 		Object.defineProperty(Date, 'unix', {
 			writable, configurable, enumerable,
@@ -565,6 +569,8 @@
 			}
 		});
 	})();
+	
+	// Document
 	(()=>{
 		if( typeof Document !== "undefined" ){
 			Object.defineProperties(Document.prototype, {
@@ -595,6 +601,8 @@
 			});
 		}
 	})();
+	
+	// Element
 	(()=>{
 		if( typeof Element !== "undefined" ){
 			const _ELEMENT_SET_ATTRIBUTE = Element.prototype.setAttribute;
@@ -669,6 +677,8 @@
 			});
 		}
 	})();
+	
+	// Error
 	(()=>{
 		if( typeof Error !== "undefined" ){
 			Object.defineProperty(Error.prototype, 'stack_trace', {
@@ -678,64 +688,7 @@
 				},
 				enumerable, configurable
 			});
-		}
-	})();
-	(()=>{
-		if( typeof EventTarget !== "undefined" ){
-			Object.defineProperty(EventTarget.prototype, 'on', {
-				configurable, writable, enumerable,
-				value: function(event_name, callback){
-					// Event name accepts name1#tag1,name2#tag1,name3#tag2
-					const inserted = [];
-					const events = event_name.split(',');
-					for( let evt_name of events ){
-						evt_name = evt_name.trim();
-						if( inserted.indexOf(evt_name) >= 0 ) continue;
-						
-						inserted.push(evt_name);
-						this.addEventListener(evt_name, callback);
-					}
-					return this;
-				}
-			});
-			Object.defineProperty(EventTarget.prototype, 'off', {
-				configurable, writable, enumerable,
-				value: function(event_name, callback){
-					const events = event_name.split(',');
-					for( let evt_name of events ){
-						evt_name = evt_name.trim();
-						this.removeEventListener(evt_name, callback);
-					}
-					return this;
-				}
-			});
-			Object.defineProperty(EventTarget.prototype, 'emit', {
-				configurable, writable, enumerable,
-				value: function(event, inits = {}){
-					const {bubbles, cancelable, composed, ...event_args} = inits;
-					
-					if( typeof event === "string" ){
-						event = new Event(event, {
-							bubbles: !!bubbles,
-							cancelable: !!cancelable,
-							composed: !!composed
-						});
-					}
-					
-					if( !(event instanceof Event) ){
-						throw new TypeError("Argument 1 accepts only string or Event instance!");
-					}
-					
-					
-					
-					Object.assign(event, event_args);
-					this.dispatchEvent(event);
-				}
-			});
-		}
-	})();
-	(()=>{
-		if( typeof Error !== "undefined" ){
+			
 			class EError extends Error {
 				constructor(message, ...args){
 					super(message, ...args);
@@ -843,65 +796,124 @@
 			});
 		}
 	})();
+	
+	// EventTarget
 	(()=>{
+		if( typeof EventTarget !== "undefined" ){
+			Object.defineProperty(EventTarget.prototype, 'on', {
+				configurable, writable, enumerable,
+				value: function(event_name, callback){
+					// Event name accepts name1#tag1,name2#tag1,name3#tag2
+					const inserted = [];
+					const events = event_name.split(',');
+					for( let evt_name of events ){
+						evt_name = evt_name.trim();
+						if( inserted.indexOf(evt_name) >= 0 ) continue;
+						
+						inserted.push(evt_name);
+						this.addEventListener(evt_name, callback);
+					}
+					return this;
+				}
+			});
+			Object.defineProperty(EventTarget.prototype, 'off', {
+				configurable, writable, enumerable,
+				value: function(event_name, callback){
+					const events = event_name.split(',');
+					for( let evt_name of events ){
+						evt_name = evt_name.trim();
+						this.removeEventListener(evt_name, callback);
+					}
+					return this;
+				}
+			});
+			Object.defineProperty(EventTarget.prototype, 'emit', {
+				configurable, writable, enumerable,
+				value: function(event, inits = {}){
+					const {bubbles, cancelable, composed, ...event_args} = inits;
+					
+					if( typeof event === "string" ){
+						event = new Event(event, {
+							bubbles: !!bubbles,
+							cancelable: !!cancelable,
+							composed: !!composed
+						});
+					}
+					
+					if( !(event instanceof Event) ){
+						throw new TypeError("Argument 1 accepts only string or Event instance!");
+					}
+					
+					
+					
+					Object.assign(event, event_args);
+					this.dispatchEvent(event);
+				}
+			});
+		}
+	})();
+	
+	// Function
+	(()=>{
+		const REF = new WeakMap();
+		const boot_async={}, boot_sync={};
+		REF.set(boot_async, {async:true,  funcs:[]});
+		REF.set(boot_sync,  {async:false, funcs:[]});
+		
+		
+		
 		Object.defineProperty(Function, 'sequential', {
 			configurable, writable, enumerable,
-			value: PackSequentialCall
+			value: PackSequentialCall.bind(null, false)
 		});
-		Object.defineProperty(PackSequentialCall, 'async', {
+		Object.defineProperty(Function.sequential, 'async', {
 			configurable: false, writable: false, enumerable: true,
-			value: PackSequentialCallAsync
+			value: PackSequentialCall.bind(null, true)
 		});
 		
-		function PackSequentialCall(func_list){
-			if( !Array.isArray(func_list) ){
-				func_list = [func_list];
-			}
+		
+		
+		function PackSequentialCall(is_async, func_list) {
+			const args = Array.prototype.slice.call(arguments, 0);
+			args[0] = is_async?boot_async:boot_sync;
+			return PackSequential.call(...args);
+		}
+		function PackSequential(func_list) {
+			const prev_state = REF.get(this);
+			const state = {async:prev_state.async, funcs:prev_state.funcs.slice(0)};
 			
-			
-			for( let i = 0; i < func_list.length; i++ ){
-				const func = func_list[i];
-				if( typeof func !== "function" ){
-					func_list[i] = ()=>func;
+			if ( arguments.length > 0 ) {
+				let func;
+				if ( !Array.isArray(func_list) ) { func_list = [func_list]; }
+				for( let i = 0; i < func_list.length; i++ ){
+					state.funcs.push((typeof (func=func_list[i]) === "function") ? func : ()=>func);
 				}
 			}
 			
+			const storage = {};
+			REF.set(storage, state);
+			const trigger = DoSequentialCall.bind(storage);
+			trigger.chain = PackSequential.bind(storage);
+			return trigger;
+		}
+		function DoSequentialCall(...spread_args) {
+			const {async:is_async, funcs:chain_items} = REF.get(this);
+			this.session = {};
 			
 			
-			const shared = {};
-			return function(...init_args){
-				let result = undefined;
-				shared.session = {};
-				
-				for( const func of func_list ){
-					result = func.call(shared, ...[...init_args, result]);
+			
+			let result = undefined;
+			if ( !is_async ) {
+				for( const func of chain_items ){
+					result = func.call(this, ...spread_args, result);
 					if( result === false ) break;
 				}
 				return result;
 			}
-		}
-		function PackSequentialCallAsync(func_list){
-			if( !Array.isArray(func_list) ){
-				func_list = [func_list];
-			}
-			
-			
-			for( let i = 0; i < func_list.length; i++ ){
-				const func = func_list[i];
-				if( typeof func !== "function" ){
-					func_list[i] = ()=>func;
-				}
-			}
-			
-			
-			
-			const shared = {};
-			return function(...init_args){
-				return Promise.resolve().then(async ()=>{
-					let result = undefined;
-					shared.session = {};
-					for( const func of func_list ){
-						result = await func.call(shared, ...[...init_args, result]);
+			else {
+				return Promise.resolve().then(async()=>{
+					for( const func of chain_items ){
+						result = await func.call(this, ...spread_args, result);
 						if( result === false ) break;
 					}
 					return result;
@@ -909,6 +921,8 @@
 			}
 		}
 	})();
+	
+	// HTMLElement
 	(()=>{
 		if( typeof HTMLElement !== "undefined" ){
 			Object.defineProperties(HTMLElement.prototype, {
@@ -951,8 +965,10 @@
 			});
 		}
 	})();
+	
+	// HTMLInputElement
 	(()=>{
-		if( typeof HTMLInputElement !== "undefined" ){
+		if( typeof HTMLInputElement !== "undefined" ) {
 			Object.defineProperty(HTMLInputElement.prototype, 'setValue', {
 				configurable, writable, enumerable,
 				value: function(value){
@@ -962,6 +978,8 @@
 			});
 		}
 	})();
+	
+	// Node
 	(()=>{
 		if( typeof Node !== "undefined" ){
 			Object.defineProperty(Node.prototype, 'prependChild', {
@@ -1002,6 +1020,8 @@
 			});
 		}
 	})();
+	
+	// Object
 	(()=>{
 		const _ObjectDefineProperty = Object.defineProperty;
 		const _ObjectDefineProperties = Object.defineProperties;
@@ -1193,6 +1213,8 @@
 			return "object";
 		}
 	})();
+	
+	// Promise
 	(()=>{
 		const _PROMISE_THEN = Promise.prototype.then;
 		const _PROMISE_CATCH = Promise.prototype.catch;
@@ -1307,6 +1329,8 @@
 			return next_promise;
 		}
 	})();
+	
+	// String
 	(()=>{
 		const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
 		const CAMEL_REPLACER = (match, $1, $2, $3, index, input)=>{
@@ -1460,7 +1484,7 @@
 				value: (content)=>{
 					if( typeof content === "string" ) return content;
 					
-					const buff = ExtractArrayBuffer(content);
+					const buff = ExtractBytes(content);
 					if( buff !== null ){
 						return UTF8Decode(new Uint8Array(buff));
 					}
@@ -1470,6 +1494,8 @@
 			}
 		});
 	})();
+	
+	// setTimeout, setInterval
 	(()=>{
 		Object.defineProperty(setTimeout, 'create', {
 			writable, configurable, enumerable,
@@ -1564,6 +1590,8 @@
 			return timeout_cb;
 		}
 	})();
+	
+	// Typed Arrays
 	(()=>{
 		const TYPED_ARRAYS = [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array];
 		const ARRAY_BUFFER_VIEWS = [DataView, ...TYPED_ARRAYS];
@@ -1598,8 +1626,6 @@
 				},
 				configurable, enumerable, writable
 			});
-			
 		}
 	})();
-	
 })();
