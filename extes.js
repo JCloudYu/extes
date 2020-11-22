@@ -884,11 +884,13 @@ function UTF8Decode(raw_bytes) {
 		REF.set(storage, state);
 		const trigger = DoSequentialCall.bind(storage);
 		trigger.chain = PackSequential.bind(storage);
+		Object.defineProperty(trigger, 'data', {configurable, enumerable:true, writable, value:storage});
+		
 		return trigger;
 	}
 	function DoSequentialCall(...spread_args) {
 		const {async:is_async, funcs:chain_items} = REF.get(this);
-		this.session = {};
+		this.current_call = {};
 		
 		
 		
