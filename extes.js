@@ -512,6 +512,12 @@ function UTF8Decode(raw_bytes) {
 	}
 })();
 (()=>{
+	Object.defineProperty(Date, 'from', {
+		writable, configurable, enumerable,
+		value: function(...args) {
+			return new Date(...args);
+		}
+	});
 	Object.defineProperty(Date, 'unix', {
 		writable, configurable, enumerable,
 		value: function() {
@@ -538,7 +544,7 @@ function UTF8Decode(raw_bytes) {
 	});
 	Object.defineProperty(Date.prototype, 'toLocaleISOString', {
 		writable, configurable, enumerable,
-		value: function(){
+		value: function(show_milli=true){
 			let offset, zone = this.getTimezoneOffset();
 			if ( zone === 0 ) {
 				offset = 'Z';
@@ -553,15 +559,14 @@ function UTF8Decode(raw_bytes) {
 			}
 			
 			
-		
+			const milli = show_milli ? ('.' + Padding(this.getMilliseconds() % 1000, 3)) : '';
 			return  this.getFullYear() +
 				'-' + Padding(this.getMonth()+1) +
 				'-' + Padding(this.getDate()) +
 				'T' + Padding(this.getHours()) +
 				':' + Padding(this.getMinutes()) +
 				':' + Padding(this.getSeconds()) +
-				'.' + (this.getMilliseconds() % 1000) +
-				offset;
+				milli + offset;
 		}
 	});
 })();
