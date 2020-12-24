@@ -1369,11 +1369,24 @@ function UTF8Decode(raw_bytes) {
 	
 	
 	Object.defineProperties(String.prototype, {
+		charCount: {
+			configurable, enumerable,
+			get:function() {
+				let i=0, count = 0;
+				while(i<this.length) {
+					const point  = this.codePointAt(i);
+					const length = ( point > 0xFFFF ) ? 2 : 1;
+					count ++;
+					i += length;
+				}
+				return count;
+			}
+		},
 		upperCase:{
 			configurable, enumerable,
 			get:function() {
 				return this.toUpperCase();
-			},
+			}
 		},
 		localeUpperCase:{
 			configurable, enumerable,
