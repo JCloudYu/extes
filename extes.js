@@ -515,8 +515,21 @@ function UTF8Decode(raw_bytes) {
 	Object.defineProperty(Date, 'from', {
 		writable, configurable, enumerable,
 		value: function(...args) {
-			return new Date(...args);
+			if ( args.length === 0 ) {
+				throw new Error("Date.from expects at least one arguments!");
+			}
+			
+			try {
+				return new Date(...args);
+			}
+			catch(e) {
+				return null;
+			}
 		}
+	});
+	Object.defineProperty(Date, 'present', {
+		configurable, enumerable,
+		get: ()=>new Date()
 	});
 	Object.defineProperty(Date, 'unix', {
 		writable, configurable, enumerable,
@@ -682,6 +695,44 @@ function UTF8Decode(raw_bytes) {
 				return this.stack.split(/\r\n|\n/g).map((item)=>item.trim());
 			},
 			enumerable, configurable
+		});
+		
+		Object.defineProperty(Error, 'trap', {
+			writable, configurable, enumerable,
+			value: function(func, default_result=undefined) {
+				const args = Array.prototype.slice.call(arguments, 0);
+				let result;
+				try { result = func();}
+				catch(e) { return args.length < 2 ? e : default_result; }
+				
+				
+				
+				if ( result instanceof Promise ) {
+					return result.catch((e)=>{
+						return args.length < 2 ? e : default_result;
+					});
+				}
+				
+				return result;
+			}
+		});
+		
+		Object.defineProperty(Error, 'trapper', {
+			writable, configurable, enumerable,
+			value: function(func, callback) {
+				return function(...args) {
+					let result;
+					try { result = func(...args); } catch(e) { callback(e); return; }
+					
+					
+					
+					if ( result instanceof Promise ) {
+						return result.catch(e=>callback(e));
+					}
+					
+					return result;
+				};
+			}
 		});
 	}
 })();
