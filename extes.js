@@ -537,22 +537,18 @@ function UTF8Decode(raw_bytes) {
 			return Math.floor(Date.now()/1000);
 		}
 	});
+	Object.defineProperty(Date, 'zoneShift', {
+		writable, configurable, enumerable,
+		value: function() {
+			const date = new Date();
+			return date.getTimezoneOffset() * 60000;
+		}
+	});
+	
 	Object.defineProperty(Date.prototype, 'getUnixTime', {
 		writable, configurable, enumerable,
 		value: function() {
 			return Math.floor(this.getTime()/1000);
-		}
-	});
-	Object.defineProperty(Date.prototype, 'unix', {
-		configurable, enumerable,
-		get: function() {
-			return Math.floor(this.getTime()/1000);
-		}
-	});
-	Object.defineProperty(Date.prototype, 'time', {
-		configurable, enumerable,
-		get: function() {
-			return this.getTime();
 		}
 	});
 	Object.defineProperty(Date.prototype, 'toLocaleISOString', {
@@ -580,6 +576,26 @@ function UTF8Decode(raw_bytes) {
 				':' + Padding(this.getMinutes()) +
 				':' + Padding(this.getSeconds()) +
 				milli + offset;
+		}
+	});
+	
+	// getter
+	Object.defineProperty(Date.prototype, 'unix', {
+		configurable, enumerable,
+		get: function() {
+			return Math.floor(this.getTime()/1000);
+		}
+	});
+	Object.defineProperty(Date.prototype, 'time', {
+		configurable, enumerable,
+		get: function() {
+			return this.getTime();
+		}
+	});
+	Object.defineProperty(Date.prototype, 'zoneShift', {
+		configurable, enumerable,
+		get: function() {
+			return this.getTimezoneOffset() * 60000;
 		}
 	});
 })();
