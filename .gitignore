@@ -4,5 +4,4 @@ Thumbs.db
 .idea
 .vs_code
 
-/package-lock.json
-/build
+package-lock.json
