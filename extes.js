@@ -1322,6 +1322,13 @@ function UTF8Decode(raw_bytes) {
 		create: {
 			writable, configurable, enumerable,
 			value: FlattenedPromise
+		},
+		chain: {
+			writable, configurable, enumerable,
+			value: (func)=>{
+				const base_promise = Promise.resolve();
+				return ( typeof func !== "function" ) ? base_promise : base_promise.then(func);
+			}
 		}
 	});
 	
