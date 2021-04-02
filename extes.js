@@ -1538,6 +1538,17 @@ function UTF8Decode(raw_bytes) {
 			value:function(token_separator='') {
 				return this.pull(token_separator, false);
 			}
+		},
+		cutin: {
+			configurable, enumerable, writable,
+			value:function(start, deleteCount, ...items) {
+				if ( start < 0 ) start = start + this.length;
+				if ( deleteCount <= 0 ) deleteCount = 0;
+				
+				const head = this.substring(0, start);
+				const tail = this.substring(start + deleteCount);
+				return head + items.join('') + tail;
+			}
 		}
 	});
 	Object.defineProperties(String, {
