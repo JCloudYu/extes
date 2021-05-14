@@ -49,20 +49,25 @@ const writable=true, configurable=true, enumerable=false;
 		_ObjectDefineProperties(object, prop_contents);
 		return object;
 	}
-	function ObjectMerge(target, source) {
-		if ( Object(target) !== target ) {
-			throw new Error("Given target is not an object");
+	function ObjectMerge(target, ...sources) {
+		if ( target === null || target === undefined ) {
+			throw new TypeError("Cannot convert undefined or null to object");
 		}
 		
-		if ( Object(source) !== source ) {
-			throw new Error("Given source is not an object");
+		target = Object(target);
+		for(const source of sources) {
+			if ( Object(source) !== source ) continue;
+			DeepMerge(target, source);
 		}
 		
-		
+		return target;
+	}
+	function DeepMerge(target, source) {
 		for (const key in source) {
-			if ( (source.hasOwnProperty && !source.hasOwnProperty(key)) ||
-				 (source[key] === undefined)
-			) { continue; }
+			let is_invalid = false;
+			is_invalid = (source.hasOwnProperty && !source.hasOwnProperty(key));
+			is_invalid = is_invalid || (source[key] === undefined);
+			if ( is_invalid ) continue;
 		
 			
 			
@@ -81,10 +86,8 @@ const writable=true, configurable=true, enumerable=false;
 				continue;
 			}
 			
-			ObjectMerge(tValue, sValue);
+			DeepMerge(tValue, sValue);
 		}
-		
-		return target;
 	}
 	function TypeOf(input, resolveObj=false) {
 		const type = typeof input;
