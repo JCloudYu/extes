@@ -1,10 +1,17 @@
 {
 	"name": "extes",
-	"version": "3.2.4",
+	"version": "4.1.0",
 	"description": "A tiny library that extends native js with some handy tools",
-	"main": "extes.js",
+	"main": "./dist/extes.js",
 	"scripts": {
-		"pack": "node ./.build/packer.js ./.build/src ./.build/tmpl.js -o ./extes.js && terser -c -m -- ./extes.js > ./extes.min.js"
+		"precompile": "rm -rf dist",
+		"compile": "tsc",
+		"postcompile": "echo \"(()=>{\" | cat - dist/source.js > dist/extes.js && echo \"})();\" >> dist/extes.js && echo \"$(tail -n +9 dist/source.d.ts)\" > dist/extes.d.ts",
+
+
+		"prebuild": "npm run compile",
+		"build": "terser -c -m -- dist/extes.js > dist/extes.min.js",
+		"postbuild": "rm -f dist/source.d.ts dist/source.js"
 	},
 	"keywords": [
 		"ECMAScript",
@@ -14,5 +21,8 @@
 		"Extension"
 	],
 	"author": "JCloudYu",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"@types/node": "^16.11.6"
+	}
 }

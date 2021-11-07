@@ -4,4 +4,4 @@ Thumbs.db
 .idea
 .vs_code
 
-package-lock.json
+node_modules
