@@ -550,7 +550,7 @@ interface Error {
 	if ( typeof Error !== "undefined" ) {
 		Object.defineProperty(Error.prototype, 'stack_trace', {
 			get: function(){
-				if ( !this.stack ) return null;
+				if ( !this.stack ) return [];
 				return this.stack.split(/\r\n|\n/g).map((item:string)=>item.trim());
 			},
 			enumerable, configurable

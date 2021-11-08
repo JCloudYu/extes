@@ -519,7 +519,7 @@ var Tools = /** @class */ (function () {
         Object.defineProperty(Error.prototype, 'stack_trace', {
             get: function () {
                 if (!this.stack)
-                    return null;
+                    return [];
                 return this.stack.split(/\r\n|\n/g).map(function (item) { return item.trim(); });
             },
             enumerable: enumerable,
