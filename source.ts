@@ -124,20 +124,22 @@ class Tools {
 
 
 
-type TypedArray = Uint8ClampedArray|Uint8Array|Int8Array|Uint16Array|Int16Array|Uint32Array|Int32Array|Float32Array|Float64Array;
-type BufferView = TypedArray|DataView;
+type BufferView = Uint8ClampedArray|Uint8Array|Int8Array|Uint16Array|Int16Array|Uint32Array|Int32Array|Float32Array|Float64Array|DataView;
 
-// ArrayBuffer and Uint8Array extension
-interface ArrayBuffer { bytes:Uint8Array; }
-interface Uint8ArrayConstructor {
-	from(data:ArrayBuffer|BufferView|number[]):Uint8Array;
-	from(data:string, conversion:'hex'|'bits'|'utf8'|16|2):Uint8Array;
-	compare(a:ArrayBuffer|BufferView, b:ArrayBuffer|BufferView):-1|0|1;
-	concat(buffers:(ArrayBuffer|BufferView)[]):Uint8Array;
-}
-interface Uint8Array {
-	compare(other:ArrayBuffer|BufferView):-1|0|1;
-	toString(format?:2|16, padding?:boolean):string;
+
+
+declare module "extes" {
+	global {
+		// ArrayBuffer and Uint8Array extension
+		interface ArrayBuffer { bytes:Uint8Array; }
+		interface Uint8ArrayConstructor {
+			from(data:ArrayBuffer|BufferView|number[]):Uint8Array;
+			from(data:string, conversion:'hex'|'bits'|'utf8'|16|2):Uint8Array;
+			compare(a:ArrayBuffer|BufferView, b:ArrayBuffer|BufferView):-1|0|1;
+			concat(buffers:(ArrayBuffer|BufferView)[]):Uint8Array;
+			dump(buffer:ArrayBuffer|BufferView, format?: 2 | 16, padding?: boolean):string;
+		}
+	}
 }
 (()=>{
 	const HEX_FORMAT = /^(0x)?([0-9a-fA-F]+)$/;
@@ -156,59 +158,6 @@ interface Uint8Array {
 		configurable, enumerable,
 		get:function():Uint8Array { return new Uint8Array(this); }
 	});
-	Object.defineProperty(Uint8Array.prototype, 'toString', {
-		configurable, writable, enumerable,
-		value:function(format:2|16=16, padding:boolean=true):string {
-			const bytes = this;
-			
-			let result = '';
-			switch(format) {
-				case 16:
-					for(let i=0; i<bytes.length; i++) {
-						const value = bytes[i];
-						result += HEX_MAP[(value&0xF0)>>>4] + HEX_MAP[value&0x0F];
-					}
-					break;
-					
-				case 2:
-					for(let i=0; i<bytes.length; i++) {
-						const value = bytes[i];
-						for (let k=7; k>=0; k--) {
-							result += ((value >>> k) & 0x01) ? '1' : '0';
-						}
-					}
-					break;
-				
-				default:
-					throw new RangeError( "Unsupported numeric representation!" );
-			}
-			
-			return padding ? result : result.replace(/^0+/, '');
-		}
-	});
-	Object.defineProperty(Uint8Array.prototype, 'compare', {
-		configurable, writable, enumerable,
-		value:function(compared_data:ArrayBuffer|BufferView) {
-			if ( ArrayBuffer.isView(compared_data) ) {
-				compared_data = new Uint8Array(compared_data.buffer);
-			}
-
-			const buffer = Tools.ExtractBytes(compared_data);
-			if ( buffer === null ) {
-				throw new TypeError("Given argument must be an ArrayBuffer, TypedArray or a DataView instance!");
-			}
-			
-			const a = this, b = buffer;
-			const len = Math.max(a.length, b.length);
-			for(let i=0; i<len; i++) {
-				const val_a = a[i] || 0, val_b = b[i] || 0;
-				if ( val_a > val_b ) return 1;
-				if ( val_a < val_b ) return -1;
-			}
-			return 0;
-		}
-	});
-
 	Object.defineProperty(Uint8Array, 'from', {
 		configurable, writable, enumerable,
 		value: function(input:ArrayBuffer|BufferView|string|number[], conversion_info?:'hex'|'bits'|'utf8'|16|2):Uint8Array {
@@ -290,9 +239,48 @@ interface Uint8Array {
 				throw new TypeError("Given arguments must be instances of ArrayBuffer, TypedArray or DataView!");
 			}
 			
-			return A.compare(B);
+			const len = Math.max(A.length, B.length);
+			for(let i=0; i<len; i++) {
+				const val_a = A[i] || 0, val_b = B[i] || 0;
+				if ( val_a > val_b ) return 1;
+				if ( val_a < val_b ) return -1;
+			}
+			return 0;
 		}
 	});
+	Object.defineProperty(Uint8Array, 'dump', {
+		configurable, writable, enumerable,
+		value: function(buffer:ArrayBuffer|BufferView, format:2|16=16, padding:boolean=true):string {
+			const bytes = Tools.ExtractBytes(buffer);
+			if ( bytes === null ) {
+				throw new TypeError("Argument 1 expects an instance of ArrayBuffer, TypedArray or DataView!");
+			}
+			
+			let result = '';
+			switch(format) {
+				case 16:
+					for(let i=0; i<bytes.length; i++) {
+						const value = bytes[i];
+						result += HEX_MAP[(value&0xF0)>>>4] + HEX_MAP[value&0x0F];
+					}
+					break;
+					
+				case 2:
+					for(let i=0; i<bytes.length; i++) {
+						const value = bytes[i];
+						for (let k=7; k>=0; k--) {
+							result += ((value >>> k) & 0x01) ? '1' : '0';
+						}
+					}
+					break;
+				
+				default:
+					throw new RangeError( "Unsupported numeric representation!" );
+			}
+			
+			return padding ? result : result.replace(/^0+/, '');
+		}
+	})
 	Object.defineProperty(Uint8Array, 'concat', {
 		configurable, writable, enumerable,
 		value: function(incoming_buffers:(ArrayBuffer|BufferView)[]) {
@@ -332,9 +320,13 @@ interface Uint8Array {
 
 
 // Array extension
-interface Array<T> {
-	unique():Array<T>;
-	exclude(reject_list:T[]):Array<T>;
+declare module "extes" {
+	global {
+		interface Array<T> {
+			unique():Array<T>;
+			exclude(reject_list:T[]):Array<T>;
+		}
+	}
 }
 (()=>{
 	Object.defineProperty(Array.prototype, 'unique', {
@@ -374,20 +366,25 @@ interface Array<T> {
 
 
 // Date extension
-interface DateConstructor {
-	present:Date;
+declare module "extes" {
+	global {
+		interface DateConstructor {
+			present:Date;
 
-	from(value:number|string):Date;
-	from(year:number, month:number, date?:number, hours?:number, minutes?:number, seconds?:number, ms?:number):Date;
-	unix():number;
-	zoneShift():number;
-}
-interface Date {
-	unix:number;
-	time:number;
-	zoneShift:number;
-	getUnixTime():number;
-	toLocaleISOString(milli?:boolean):string;
+			from(value:number|string):Date;
+			from(year:number, month:number, date?:number, hours?:number, minutes?:number, seconds?:number, ms?:number):Date;
+			unix():number;
+			zoneShift():number;
+		}
+
+		interface Date {
+			unix:number;
+			time:number;
+			zoneShift:number;
+			getUnixTime():number;
+			toLocaleISOString(milli?:boolean):string;
+		}
+	}
 }
 (()=>{
 	Object.defineProperty(Date, 'from', {
@@ -506,8 +503,12 @@ interface Date {
 
 
 // Document extension
-interface Document {
-	parseHTML(html:string):DocumentFragment;
+declare module "extes" {
+	global {
+		interface Document {
+			parseHTML(html:string):DocumentFragment;
+		}
+	}
 }
 (()=>{
 	if ( typeof Document !== "undefined" ) {
@@ -543,8 +544,12 @@ interface Document {
 
 
 // Error extension
-interface Error {
-	stack_trace:string[];
+declare module "extes" {
+	global {
+		interface Error {
+			stack_trace:string[];
+		}
+	}
 }
 (()=>{
 	if ( typeof Error !== "undefined" ) {
@@ -561,10 +566,14 @@ interface Error {
 
 
 // EventTarget extension
-interface EventTarget {
-	on(event_name:string, callback:(...args:any[])=>void|Promise<void>):this;
-	off(event_name:string, callback:(...args:any[])=>void|Promise<void>):this;
-	emit(event:string|Event, inits?:{bubbles?:boolean, cancelable?:boolean, composed?:boolean, [key:string]:any}):boolean;
+declare module "extes" {
+	global {
+		interface EventTarget {
+			on(event_name:string, callback:(...args:any[])=>void|Promise<void>):this;
+			off(event_name:string, callback:(...args:any[])=>void|Promise<void>):this;
+			emit(event:string|Event, inits?:{bubbles?:boolean, cancelable?:boolean, composed?:boolean, [key:string]:any}):boolean;
+		}
+	}
 }
 (()=>{
 	if ( typeof EventTarget !== "undefined" ) {
@@ -624,8 +633,12 @@ interface EventTarget {
 
 
 // Function extension
-interface FunctionConstructor {
-	sequential<ReturnType=any, ArgTypes extends any[] = any[]>(func_list:((...args:any[])=>any)[], is_async?:boolean, spread_args?:boolean):(...args:ArgTypes)=>ReturnType;
+declare module "extes" {
+	global {
+		interface FunctionConstructor {
+			sequential<ReturnType=any, ArgTypes extends any[] = any[]>(func_list:((...args:any[])=>any)[], is_async?:boolean, spread_args?:boolean):(...args:ArgTypes)=>ReturnType;
+		}
+	}
 }
 (()=>{
 	Object.defineProperty(Function, 'sequential', {
@@ -675,9 +688,13 @@ interface FunctionConstructor {
 
 
 // Object extension
-interface ObjectConstructor {
-	merge(target:{[key:string]:any}, ...sources:{[key:string]:any}[]):{[key:string]:any};
-	typeOf(data:any):string;
+declare module "extes" {
+	global {
+		interface ObjectConstructor {
+			merge(target:{[key:string]:any}, ...sources:{[key:string]:any}[]):{[key:string]:any};
+			typeOf(data:any):string;
+		}
+	}
 }
 (()=>{
 	Object.defineProperty(Object, 'merge', {
@@ -846,10 +863,14 @@ interface ObjectConstructor {
 
 
 // Promise extension
-interface PromiseConstructor{
-	create<Type=any>():Promise<Type>&{resolve:(result:any)=>void, reject:(error:any)=>void, promise:Promise<Type>};
-	wait<ReturnTypes extends any[] = any[]>():ReturnTypes;
-	chain<Type=any>(func:(...args:any[])=>any):Promise<Type>;
+declare module "extes" {
+	global {
+		interface PromiseConstructor{
+			create<Type=any>():Promise<Type>&{resolve:(result:any)=>void, reject:(error:any)=>void, promise:Promise<Type>};
+			wait<ReturnTypes extends any[] = any[]>():ReturnTypes;
+			chain<Type=any>(func:(...args:any[])=>any):Promise<Type>;
+		}
+	}
 }
 (()=>{
 	Object.defineProperties(Promise, {
@@ -929,21 +950,25 @@ interface PromiseConstructor{
 
 
 // String extension
-interface StringConstructor {
-	encodeRegExpString(input_str:string):string;
-	from(content:Uint8Array|ArrayBuffer|string):string;
-}
-interface String {
-	charCount:number;
-	upperCase:string;
-	localeUpperCase:string;
-	lowerCase:string;
-	localeLowerCase:string;
-	camelCase:string;
+declare module "extes" {
+	global {
+		interface StringConstructor {
+			encodeRegExpString(input_str:string):string;
+			from(content:Uint8Array|ArrayBuffer|string):string;
+		}
+		interface String {
+			charCount:number;
+			upperCase:string;
+			localeUpperCase:string;
+			lowerCase:string;
+			localeLowerCase:string;
+			camelCase:string;
 
-	toCamelCase():string;
-	pull(token_separator?:string, from_begin?:boolean):[string|undefined, string|undefined];
-	cutin(start:number, deleteCount:number, ...items:any[]):string;
+			toCamelCase():string;
+			pull(token_separator?:string, from_begin?:boolean):[string|undefined, string|undefined];
+			cutin(start:number, deleteCount:number, ...items:any[]):string;
+		}
+	}
 }
 (()=>{
 	const CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
@@ -1076,12 +1101,16 @@ interface String {
 
 
 // Timer extension
-declare namespace setTimeout {
-	function idle(milli:number):Promise<void>;
-	function create():(...args:any[])=>void & {clear:()=>void};
-}
-declare namespace setInterval {
-	function create():(...args:any[])=>void & {clear:()=>void};
+declare module "extes" {
+	global {
+		namespace setTimeout {
+			function idle(milli:number):Promise<void>;
+			function create():(...args:any[])=>void & {clear:()=>void};
+		}
+		namespace setInterval {
+			function create():(...args:any[])=>void & {clear:()=>void};
+		}
+	}
 }
 (()=>{
 	Object.defineProperty(setTimeout, 'create', {

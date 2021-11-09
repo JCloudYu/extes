@@ -173,60 +173,6 @@ var Tools = /** @class */ (function () {
         enumerable: enumerable,
         get: function () { return new Uint8Array(this); }
     });
-    Object.defineProperty(Uint8Array.prototype, 'toString', {
-        configurable: configurable,
-        writable: writable,
-        enumerable: enumerable,
-        value: function (format, padding) {
-            if (format === void 0) { format = 16; }
-            if (padding === void 0) { padding = true; }
-            var bytes = this;
-            var result = '';
-            switch (format) {
-                case 16:
-                    for (var i = 0; i < bytes.length; i++) {
-                        var value = bytes[i];
-                        result += HEX_MAP[(value & 0xF0) >>> 4] + HEX_MAP[value & 0x0F];
-                    }
-                    break;
-                case 2:
-                    for (var i = 0; i < bytes.length; i++) {
-                        var value = bytes[i];
-                        for (var k = 7; k >= 0; k--) {
-                            result += ((value >>> k) & 0x01) ? '1' : '0';
-                        }
-                    }
-                    break;
-                default:
-                    throw new RangeError("Unsupported numeric representation!");
-            }
-            return padding ? result : result.replace(/^0+/, '');
-        }
-    });
-    Object.defineProperty(Uint8Array.prototype, 'compare', {
-        configurable: configurable,
-        writable: writable,
-        enumerable: enumerable,
-        value: function (compared_data) {
-            if (ArrayBuffer.isView(compared_data)) {
-                compared_data = new Uint8Array(compared_data.buffer);
-            }
-            var buffer = Tools.ExtractBytes(compared_data);
-            if (buffer === null) {
-                throw new TypeError("Given argument must be an ArrayBuffer, TypedArray or a DataView instance!");
-            }
-            var a = this, b = buffer;
-            var len = Math.max(a.length, b.length);
-            for (var i = 0; i < len; i++) {
-                var val_a = a[i] || 0, val_b = b[i] || 0;
-                if (val_a > val_b)
-                    return 1;
-                if (val_a < val_b)
-                    return -1;
-            }
-            return 0;
-        }
-    });
     Object.defineProperty(Uint8Array, 'from', {
         configurable: configurable,
         writable: writable,
@@ -295,7 +241,48 @@ var Tools = /** @class */ (function () {
             if (!A || !B) {
                 throw new TypeError("Given arguments must be instances of ArrayBuffer, TypedArray or DataView!");
             }
-            return A.compare(B);
+            var len = Math.max(A.length, B.length);
+            for (var i = 0; i < len; i++) {
+                var val_a = A[i] || 0, val_b = B[i] || 0;
+                if (val_a > val_b)
+                    return 1;
+                if (val_a < val_b)
+                    return -1;
+            }
+            return 0;
+        }
+    });
+    Object.defineProperty(Uint8Array, 'dump', {
+        configurable: configurable,
+        writable: writable,
+        enumerable: enumerable,
+        value: function (buffer, format, padding) {
+            if (format === void 0) { format = 16; }
+            if (padding === void 0) { padding = true; }
+            var bytes = Tools.ExtractBytes(buffer);
+            if (bytes === null) {
+                throw new TypeError("Argument 1 expects an instance of ArrayBuffer, TypedArray or DataView!");
+            }
+            var result = '';
+            switch (format) {
+                case 16:
+                    for (var i = 0; i < bytes.length; i++) {
+                        var value = bytes[i];
+                        result += HEX_MAP[(value & 0xF0) >>> 4] + HEX_MAP[value & 0x0F];
+                    }
+                    break;
+                case 2:
+                    for (var i = 0; i < bytes.length; i++) {
+                        var value = bytes[i];
+                        for (var k = 7; k >= 0; k--) {
+                            result += ((value >>> k) & 0x01) ? '1' : '0';
+                        }
+                    }
+                    break;
+                default:
+                    throw new RangeError("Unsupported numeric representation!");
+            }
+            return padding ? result : result.replace(/^0+/, '');
         }
     });
     Object.defineProperty(Uint8Array, 'concat', {

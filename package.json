@@ -1,6 +1,6 @@
 {
 	"name": "extes",
-	"version": "4.1.1",
+	"version": "4.1.2",
 	"description": "A tiny library that extends native js with some handy tools",
 	"main": "./dist/extes.js",
 	"scripts": {
