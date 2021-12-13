@@ -700,14 +700,12 @@ declare module "extes" {
 	Object.defineProperty(Object, 'merge', {
 		writable, configurable, enumerable,
 		value: function(target:{[key:string]:any}, ...sources:{[key:string]:any}[]):{[key:string]:any} {
-			if ( Object(target) !== target ) {
-				throw new TypeError("Argument 1 must be an object!");
+			const target_type = TypeOf(target);
+			if ( target_type !== "Object" ) {
+				throw new TypeError(`This api expects argument 1 to be a simple object! But receved ${target_type}!`);
 			}
 			
-			for(const source of sources) {
-				if ( Object(source) !== source ) continue;
-				DeepMerge(target, source);
-			}
+			for(const source of sources) DeepMerge(target, source);
 			
 			return target;
 		}
@@ -724,139 +722,24 @@ declare module "extes" {
 	
 	function DeepMerge(target:{[key:string]:any}, source:{[key:string]:any}) {
 		for (const key in source) {
-			let is_invalid = false;
-			is_invalid = (source.hasOwnProperty && !source.hasOwnProperty(key));
-			is_invalid = is_invalid || (source[key] === undefined);
-			if ( is_invalid ) continue;
-		
-			
+			if ( source[key] === undefined ) continue;
 			
 			const tValue = target[key];
 			const sValue = source[key];
 			const tType	 = TypeOf(tValue);
 			const sType	 = TypeOf(sValue);
 			
-			if ( tType !== "object" || sType !== "object" ) {
-				if ( target instanceof Map ) {
-					target.set(key, sValue);
-				}
-				else {
-					target[key] = sValue;
-				}
+			if ( tType !== "Object" || sType !== "Object" ) {
+				target[key] = sValue;
 				continue;
 			}
 			
 			DeepMerge(tValue, sValue);
 		}
 	}
-	function TypeOf(input:any, resolveObj=false):string {
-		const type = typeof input;
-		switch(type) {
-			case "number":
-			case "string":
-			case "function":
-			case "boolean":
-			case "undefined":
-			case "symbol":
-				return type;
-		}
-		
-		if ( input === null ) {
-			return "null";
-		}
-		
-		if ( input instanceof String ) {
-			return "string";
-		}
-		
-		if ( input instanceof Number ) {
-			return "number";
-		}
-		
-		if ( input instanceof Boolean ) {
-			return "boolean";
-		}
-		
-		if ( Array.isArray(input) ) {
-			return "array";
-		}
-		
-		
-		if ( !resolveObj ) {
-			return "object";
-		}
-		
-		
-		// None-primitive
-		if ( input instanceof ArrayBuffer ) {
-			return "array-buffer"
-		}
-		
-		if ( input instanceof DataView ) {
-			return "data-view";
-		}
-		
-		if ( input instanceof Uint8Array ) {
-			return "uint8-array";
-		}
-		
-		if ( input instanceof Uint8ClampedArray ) {
-			return "uint8-clamped-array";
-		}
-		
-		if ( input instanceof Int8Array ) {
-			return "int8-array";
-		}
-		
-		if ( input instanceof Uint16Array ) {
-			return "uint16-array";
-		}
-		
-		if ( input instanceof Int16Array ) {
-			return "int16-array";
-		}
-		
-		if ( input instanceof Uint32Array ) {
-			return "uint32-array";
-		}
-		
-		if ( input instanceof Int32Array ) {
-			return "int32-array";
-		}
-		
-		if ( input instanceof Float32Array ) {
-			return "float32-array";
-		}
-		
-		if ( input instanceof Float64Array ) {
-			return "float64-array";
-		}
-		
-		if ( input instanceof Map ) {
-			return "map";
-		}
-		
-		if ( input instanceof WeakMap ) {
-			return "weak-map";
-		}
-		
-		if ( input instanceof Set ) {
-			return "set";
-		}
-		
-		if ( input instanceof WeakSet ) {
-			return "weak-set";
-		}
-		
-		if ( input instanceof RegExp ) {
-			return "regexp"
-		}
-		
-		if ( input instanceof Promise ) {
-			return "promise";
-		}
-		
-		return "object";
+	function TypeOf(input:any):string {
+		const result = Object.prototype.toString.call(input);
+		return result.substring(8, result.length-1);
 	}
 })();
 

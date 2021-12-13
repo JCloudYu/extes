@@ -646,13 +646,12 @@ var Tools = /** @class */ (function () {
             for (var _i = 1; _i < arguments.length; _i++) {
                 sources[_i - 1] = arguments[_i];
             }
-            if (Object(target) !== target) {
-                throw new TypeError("Argument 1 must be an object!");
+            var target_type = TypeOf(target);
+            if (target_type !== "Object") {
+                throw new TypeError("This api expects argument 1 to be a simple object! But receved " + target_type + "!");
             }
             for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
                 var source = sources_1[_a];
-                if (Object(source) !== source)
-                    continue;
                 DeepMerge(target, source);
             }
             return target;
@@ -666,110 +665,22 @@ var Tools = /** @class */ (function () {
     });
     function DeepMerge(target, source) {
         for (var key in source) {
-            var is_invalid = false;
-            is_invalid = (source.hasOwnProperty && !source.hasOwnProperty(key));
-            is_invalid = is_invalid || (source[key] === undefined);
-            if (is_invalid)
+            if (source[key] === undefined)
                 continue;
             var tValue = target[key];
             var sValue = source[key];
             var tType = TypeOf(tValue);
             var sType = TypeOf(sValue);
-            if (tType !== "object" || sType !== "object") {
-                if (target instanceof Map) {
-                    target.set(key, sValue);
-                }
-                else {
-                    target[key] = sValue;
-                }
+            if (tType !== "Object" || sType !== "Object") {
+                target[key] = sValue;
                 continue;
             }
             DeepMerge(tValue, sValue);
         }
     }
-    function TypeOf(input, resolveObj) {
-        if (resolveObj === void 0) { resolveObj = false; }
-        var type = typeof input;
-        switch (type) {
-            case "number":
-            case "string":
-            case "function":
-            case "boolean":
-            case "undefined":
-            case "symbol":
-                return type;
-        }
-        if (input === null) {
-            return "null";
-        }
-        if (input instanceof String) {
-            return "string";
-        }
-        if (input instanceof Number) {
-            return "number";
-        }
-        if (input instanceof Boolean) {
-            return "boolean";
-        }
-        if (Array.isArray(input)) {
-            return "array";
-        }
-        if (!resolveObj) {
-            return "object";
-        }
-        // None-primitive
-        if (input instanceof ArrayBuffer) {
-            return "array-buffer";
-        }
-        if (input instanceof DataView) {
-            return "data-view";
-        }
-        if (input instanceof Uint8Array) {
-            return "uint8-array";
-        }
-        if (input instanceof Uint8ClampedArray) {
-            return "uint8-clamped-array";
-        }
-        if (input instanceof Int8Array) {
-            return "int8-array";
-        }
-        if (input instanceof Uint16Array) {
-            return "uint16-array";
-        }
-        if (input instanceof Int16Array) {
-            return "int16-array";
-        }
-        if (input instanceof Uint32Array) {
-            return "uint32-array";
-        }
-        if (input instanceof Int32Array) {
-            return "int32-array";
-        }
-        if (input instanceof Float32Array) {
-            return "float32-array";
-        }
-        if (input instanceof Float64Array) {
-            return "float64-array";
-        }
-        if (input instanceof Map) {
-            return "map";
-        }
-        if (input instanceof WeakMap) {
-            return "weak-map";
-        }
-        if (input instanceof Set) {
-            return "set";
-        }
-        if (input instanceof WeakSet) {
-            return "weak-set";
-        }
-        if (input instanceof RegExp) {
-            return "regexp";
-        }
-        if (input instanceof Promise) {
-            return "promise";
-        }
-        return "object";
+    function TypeOf(input) {
+        var result = Object.prototype.toString.call(input);
+        return result.substring(8, result.length - 1);
     }
 })();
 (function () {
