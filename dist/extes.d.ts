@@ -96,7 +96,7 @@ declare module "extes" {
                 reject: (error: any) => void;
                 promise: Promise<Type>;
             };
-            wait<ReturnTypes extends any[] = any[]>(): ReturnTypes;
+            wait<ReturnTypes extends any[] = any[]>(promises: Promise<any>[]): Promise<ReturnTypes>;
             chain<Type = any>(func: (...args: any[]) => any): Promise<Type>;
         }
     }

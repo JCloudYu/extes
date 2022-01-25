@@ -750,7 +750,7 @@ declare module "extes" {
 	global {
 		interface PromiseConstructor{
 			create<Type=any>():Promise<Type>&{resolve:(result:any)=>void, reject:(error:any)=>void, promise:Promise<Type>};
-			wait<ReturnTypes extends any[] = any[]>():ReturnTypes;
+			wait<ReturnTypes extends any[] = any[]>(promises:Promise<any>[]):Promise<ReturnTypes>;
 			chain<Type=any>(func:(...args:any[])=>any):Promise<Type>;
 		}
 	}
