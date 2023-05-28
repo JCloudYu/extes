@@ -47,10 +47,14 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 var writable = true, configurable = true, enumerable = false;
 var Tools = /** @class */ (function () {
@@ -59,7 +63,7 @@ var Tools = /** @class */ (function () {
     Tools.Padding = function (val, length, stuffing) {
         if (length === void 0) { length = 2; }
         if (stuffing === void 0) { stuffing = '0'; }
-        val = "" + val;
+        val = "".concat(val);
         var remain = length - val.length;
         while (remain-- > 0) {
             val = stuffing + val;
@@ -599,8 +603,8 @@ var Tools = /** @class */ (function () {
                             prev_result = func;
                             continue;
                         }
-                        var args = spread_args ? __spreadArray(__spreadArray([], incoming_args), [prev_result]) : [prev_result];
-                        prev_result = func.call.apply(func, __spreadArray([session_this], args));
+                        var args = spread_args ? __spreadArray(__spreadArray([], incoming_args, true), [prev_result], false) : [prev_result];
+                        prev_result = func.call.apply(func, __spreadArray([session_this], args, false));
                     }
                     return prev_result;
                 }
@@ -619,8 +623,8 @@ var Tools = /** @class */ (function () {
                                         prev_result = func;
                                         return [3 /*break*/, 3];
                                     }
-                                    args = spread_args ? __spreadArray(__spreadArray([], incoming_args), [prev_result]) : [prev_result];
-                                    return [4 /*yield*/, func.call.apply(func, __spreadArray([session_this], args))];
+                                    args = spread_args ? __spreadArray(__spreadArray([], incoming_args, true), [prev_result], false) : [prev_result];
+                                    return [4 /*yield*/, func.call.apply(func, __spreadArray([session_this], args, false))];
                                 case 2:
                                     prev_result = _a.sent();
                                     _a.label = 3;
@@ -648,7 +652,7 @@ var Tools = /** @class */ (function () {
             }
             var target_type = TypeOf(target);
             if (target_type !== "Object") {
-                throw new TypeError("This api expects argument 1 to be a simple object! But receved " + target_type + "!");
+                throw new TypeError("This api expects argument 1 to be a simple object! But receved ".concat(target_type, "!"));
             }
             for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
                 var source = sources_1[_a];
@@ -756,7 +760,7 @@ var Tools = /** @class */ (function () {
 (function () {
     var CAMEL_CASE_PATTERN = /(\w)(\w*)(\W*)/g;
     var CAMEL_REPLACER = function (match, $1, $2, $3) {
-        return "" + $1.toUpperCase() + $2.toLowerCase() + $3;
+        return "".concat($1.toUpperCase()).concat($2.toLowerCase()).concat($3);
     };
     Object.defineProperties(String.prototype, {
         charCount: {
@@ -994,7 +998,7 @@ var Tools = /** @class */ (function () {
                     }
                 });
             }); };
-            _timeout.apply(void 0, __spreadArray([___DO_TIMEOUT, interval], args));
+            _timeout.apply(void 0, __spreadArray([___DO_TIMEOUT, interval], args, false));
         };
         timeout_cb.clear = function () {
             _timeout.clear();

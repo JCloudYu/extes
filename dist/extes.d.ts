@@ -115,7 +115,7 @@ declare module "extes" {
             localeLowerCase: string;
             camelCase: string;
             toCamelCase(): string;
-            pull(token_separator?: string, from_begin?: boolean): [string | undefined, string | undefined];
+            pull(token_separator?: string, from_begin?: boolean): [string, string];
             cutin(start: number, deleteCount: number, ...items: any[]): string;
         }
     }
